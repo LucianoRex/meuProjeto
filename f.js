@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
           subA.textContent = subitem.text;
   
           subA.setAttribute("href", subitem.link);
-          subA.setAttribute("data-nome", subitem.link);
+          subA.setAttribute("data-html", subitem.html);
           subA.setAttribute("link", subitem.link);
   
           subLi.appendChild(subA);
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
     let tabCount = 1;
   
-    //const mainContent = document.querySelector("main");
+    const mainContent = document.querySelector("main");
     //const navTabs = document.querySelector('#navTabs');
   
     // Função para carregar a página no main
@@ -102,9 +102,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
     function loadPage(id,html) {
   
-      if(document.querySelector(`#navTabs button[data-nome="${id}"]`)){
+      if(document.querySelector(`#navTabs a[data-nome="${id}"]`)){
+          alert()
           
-          const existingTab = document.querySelector(`#navTabs button[data-nome="${id}"]`);
+          const existingTab = document.querySelector(`#navTabs a[data-nome="${id}"]`);
               $(existingTab).tab('show');
               return;
       }
@@ -115,30 +116,30 @@ document.addEventListener("DOMContentLoaded", function () {
       const tabId = `tab-${tabCount}`;
       const tabContentId = `tabContent-${tabCount}`;
       const newTab = document.createElement("li");
-      newTab.classList.add("nav-item");
+      newTab.classList.add("nav-item.active");
       newTab.innerHTML = `
           <button class="nav-link" data-nome="${id}" id="${tabId}" data-toggle="tab" 
           href="#${tabContentId}" role="tab" aria-controls="${tabContentId}" 
           aria-selected="true">
-              ${id}<button type="button" class="close" aria-label="Close">
-              <span aria-hidden="true" style="margin-left: 10px;">&times;</span>
-            </button>
+              ${id} <button type="button" class="close" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
           </button>`;
       navTabs.appendChild(newTab);
   
       // Adicionar conteúdo da página à nova aba
       const newTabContent = document.createElement("div");
       newTabContent.classList.add("tab-pane", "fade");
-      if (tabCount === 0) {
-        //newTabContent.classList.add("show", "active");
-      }
+      /*if (tabCount === 0) {
+        newTabContent.classList.add("show", "active");
+      }*/
   
-      //newTabContent.classList.add("active");
+      //newTabContent.classList.add("show", "success");
       if (navTabs.querySelector('a.nav-link')) {
                   $(navTabs.querySelectorAll('a.nav-link:last-child')).tab('show');
               }
       newTabContent.id = tabContentId;
-      //newTabContent.setAttribute("role", "btn-success");
+      newTabContent.setAttribute("role", "btn-success");
       newTabContent.innerHTML = html;
       document.getElementById("tabContent").appendChild(newTabContent);
   
@@ -154,9 +155,9 @@ document.addEventListener("DOMContentLoaded", function () {
         tab.parentNode.removeChild(tab);
   
         newTab.parentNode.removeChild(newTab);
-        if (navTabs.querySelector('button.nav-link')) {
+        if (navTabs.querySelectorAll('a.nav-link')) {
           
-          $(navTabs.querySelectorAll('button.nav-link:last-child')).tab('show');
+          $(navTabs.querySelector('a.nav-link:last-child')).tab('show');
       }
   
         // Se não houver mais abas, carregar uma nova página no main
@@ -213,9 +214,8 @@ document.addEventListener("DOMContentLoaded", function () {
       link.addEventListener("click", function (event) {
         event.preventDefault(); // Evita que o link seja seguido normalmente
         // const pageId = link;
-       // const pageId = link.dataset.nome;
-       const pageId = link.getAttribute("href");
-        console.log(link.dataset.nome);
+        const pageId = link.getAttribute("href");
+        console.log(pageId);
         //loadPage(pages[pageId]);
   
         //addMenuItemAndTab(pageId, pages[pageId])
@@ -227,3 +227,4 @@ document.addEventListener("DOMContentLoaded", function () {
     //const initialPageId = "dashboard"; // Defina a página inicial aqui
     //loadPage(pages[initialPageId]);
   });
+  
