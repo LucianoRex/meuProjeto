@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Bootstrap</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+          padding-bottom: 70px; /* Ajusta o espaço para o footer */
+        }
+    
+        .footer {
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+          height: 60px; /* Altura do footer */
+          background-color: #f5f5f5;
+          border-top: 1px solid #ddd;
+          line-height: 60px;
+          text-align: center;
+        }
+        .nav-tabs .nav-item .nav-link {
+  
+  
+}
+/*
+.nav-tabs .nav-item .nav-link.active {
+  color: #ffffff;
+  background-color: #0080FF;
+}
+
+.tab-content {
+  border: 1px solid #dee2e6;
+  border-top: transparent;
+  padding: 15px;
+}
+
+.tab-content .tab-pane {
+  background-color: #FFF;
+  color: #0080FF;
+  min-height: 200px;
+  height: auto;
+}*/
+      </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Brand</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <!-- Menu Esquerdo -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column" id="menuItems">
+                        <!-- Itens do menu serão inseridos aqui dinamicamente -->
+                    </ul>
+                </div>
+            </nav>
+            
+            
+            <!-- Main -->
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4" id="mainContent">
+               
+                <div class="container mt-4">
+                    <ul class="nav nav-tabs" id="navTabs" role="tablist">
+                      <!--li class="nav-item">
+                        <a class="nav-link active" id="tab-0" data-toggle="tab" href="#tabContent-0" role="tab" aria-controls="tabContent-0" aria-selected="true">Main</a>
+                      </li>-->
+                    </ul>
+                    <div class="tab-content" id="tabContent">
+                      <div class="tab-pane fade show active" id="tabContent-0" role="tabpanel" aria-labelledby="tab-0">
+                        <main id="mainContent"></main>
+                      </div>
+                    </div>
+                  </div>
+                
+
+                <!--<nav>
+                    <div class="nav nav-tabs" id="navTabs" role="tablist">
+                      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
+                      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Perfil</a>
+                      <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contato</a>
+                    </div>
+                  </nav>
+                  <div class="tab-content" id="tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">...</div>
+                    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+                  </div>-->
+                
+                
+            </main>
+            
+            
+            
+        </div>
+    </div>
+
+    
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted">Coloque o conteúdo do rodapé aqui.</span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="script.js"></script> <!-- Link para o arquivo JavaScript -->
+</body>
+</html>
