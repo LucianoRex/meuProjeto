@@ -1,230 +1,154 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const menuItems = [
-      { text: "Dashboard" },
-      {
-        text: "Orders",
-        submenu: [
-          { text: "New Order", link: "new_order" },
-          { text: "Pending Orders", link: "new_order3" },
-          { text: "Completed Orders", link: "new_order2" },
-        ],
-      },
-      {
-        text: "Products",
-        link: "#",
-        submenu: [
-          { text: "New Product", link: "#" },
-          { text: "Inventory", link: "#" },
-          { text: "Categories", link: "#" },
-        ],
-      },
-      { text: "Customers", link: "#" },
-      {
-        text: "Reports",
-        link: "#",
-        submenu: [
-          { text: "Sales Report", link: "#" },
-          { text: "Customer Report", link: "#" },
-        ],
-      },
-      { text: "Integrations", link: "#" },
-    ];
-  
-    const menuContainer = document.getElementById("menuItems");
-  
-    menuItems.forEach((item, index) => {
-      const li = document.createElement("li");
-      li.classList.add("nav-item");
-  
-      const a = document.createElement("a");
-      a.classList.add("nav-link");
-      // a.href = item.link;
-      a.textContent = item.text;
-  
-      li.appendChild(a);
-  
-      if (item.submenu && item.submenu.length > 0) {
-        const submenuId = `submenu-${index}`;
-        console.log(submenuId);
-        a.setAttribute("data-toggle", "collapse");
-        a.setAttribute("aria-expanded", "false");
-        a.setAttribute("aria-controls", submenuId);
-        a.href = `#${submenuId}`;
-  
-        const submenuDiv = document.createElement("div");
-        submenuDiv.classList.add("collapse");
-        submenuDiv.id = submenuId;
-  
-        const submenuUl = document.createElement("ul");
-        submenuUl.classList.add("nav", "flex-column", "ml-3");
-  
-        item.submenu.forEach((subitem) => {
-          const subLi = document.createElement("li");
-          subLi.classList.add("nav-item");
-  
-          const subA = document.createElement("a");
-          subA.classList.add("submenu");
-          subA.classList.add("nav-link");
-          subA.href = subitem.link;
-          console.log(subitem.link);
-          subA.textContent = subitem.text;
-  
-          subA.setAttribute("href", subitem.link);
-          subA.setAttribute("data-html", subitem.html);
-          subA.setAttribute("link", subitem.link);
-  
-          subLi.appendChild(subA);
-          submenuUl.appendChild(subLi);
-        });
-  
-        submenuDiv.appendChild(submenuUl);
-        li.appendChild(submenuDiv);
+document.addEventListener("DOMContentLoaded", function() {
+  const formConfig = [
+      { type: 'text', label: 'Nome', id: 'nome', placeholder: 'Digite seu nome', class: 'col-md-6' },
+      { type: 'email', label: 'Email', id: 'email', placeholder: 'Digite seu email', class: 'col-md-6' },
+      { type: 'password', label: 'Senha', id: 'senha', placeholder: 'Digite sua senha', class: 'col-md-6' },
+      { type: 'textarea', label: 'Mensagem', id: 'mensagem', placeholder: 'Digite sua mensagem', class: 'col-12' },
+      { type: 'select', label: 'Gênero', id: 'genero', options: ['Masculino', 'Feminino', 'Outro'], class: 'col-md-6' },
+      { type: 'checkbox', label: 'Interesses', id: 'interesses', options: ['Esportes', 'Música', 'Tecnologia'], class: 'col-md-6' },
+      { type: 'radio', label: 'Plano', id: 'plano', options: ['Básico', 'Premium'], class: 'col-md-6' },
+      { type: 'submit', label: 'Enviar', class: 'col-12' }
+  ];
+
+  function createInputField(field) {
+      let formGroup = document.createElement('div');
+      formGroup.className = `form-group ${field.class}`;
+
+      if (field.type !== 'submit' && field.type !== 'checkbox' && field.type !== 'radio') {
+          let label = document.createElement('label');
+          label.setAttribute('for', field.id);
+          label.textContent = field.label;
+          formGroup.appendChild(label);
       }
-      9;
-      menuContainer.appendChild(li);
-    });
+
+      let input;
+
+      switch (field.type) {
+          case 'text':
+          case 'email':
+          case 'password':
+              input = document.createElement('input');
+              input.type = field.type;
+              input.className = 'form-control';
+              input.id = field.id;
+              input.placeholder = field.placeholder;
+              break;
+          case 'textarea':
+              input = document.createElement('textarea');
+              input.className = 'form-control';
+              input.id = field.id;
+              input.placeholder = field.placeholder;
+              break;
+          case 'select':
+              input = document.createElement('select');
+              input.className = 'form-control';
+              input.id = field.id;
+              field.options.forEach(option => {
+                  let optionElement = document.createElement('option');
+                  optionElement.value = option;
+                  optionElement.textContent = option;
+                  input.appendChild(optionElement);
+              });
+              break;
+          case 'checkbox':
+              let checkboxLabel = document.createElement('label');
+              checkboxLabel.className = 'form-label';
+              checkboxLabel.textContent = field.label;
+              formGroup.appendChild(checkboxLabel);
+
+              field.options.forEach(option => {
+                  let checkboxWrapper = document.createElement('div');
+                  checkboxWrapper.className = 'form-check';
+
+                  let checkboxInput = document.createElement('input');
+                  checkboxInput.type = 'checkbox';
+                  checkboxInput.className = 'form-check-input';
+                  checkboxInput.name = field.id;
+                  checkboxInput.id = `${field.id}_${option}`;
+                  checkboxInput.value = option;
+
+                  let checkboxOptionLabel = document.createElement('label');
+                  checkboxOptionLabel.setAttribute('for', `${field.id}_${option}`);
+                  checkboxOptionLabel.className = 'form-check-label';
+                  checkboxOptionLabel.textContent = option;
+
+                  checkboxWrapper.appendChild(checkboxInput);
+                  checkboxWrapper.appendChild(checkboxOptionLabel);
+                  formGroup.appendChild(checkboxWrapper);
+              });
+              break;
+          case 'radio':
+              let radioLabel = document.createElement('label');
+              radioLabel.className = 'form-label';
+              radioLabel.textContent = field.label;
+              formGroup.appendChild(radioLabel);
+
+              field.options.forEach(option => {
+                  let radioWrapper = document.createElement('div');
+                  radioWrapper.className = 'form-check';
+
+                  let radioInput = document.createElement('input');
+                  radioInput.type = 'radio';
+                  radioInput.className = 'form-check-input';
+                  radioInput.name = field.id;
+                  radioInput.id = `${field.id}_${option}`;
+                  radioInput.value = option;
+
+                  let radioOptionLabel = document.createElement('label');
+                  radioOptionLabel.setAttribute('for', `${field.id}_${option}`);
+                  radioOptionLabel.className = 'form-check-label';
+                  radioOptionLabel.textContent = option;
+
+                  radioWrapper.appendChild(radioInput);
+                  radioWrapper.appendChild(radioOptionLabel);
+                  formGroup.appendChild(radioWrapper);
+              });
+              break;
+          case 'submit':
+              input = document.createElement('button');
+              input.type = 'submit';
+              input.className = 'btn btn-primary';
+              input.textContent = field.label;
+              formGroup.appendChild(input);
+              return formGroup;
+      }
+
+      if (field.type !== 'checkbox' && field.type !== 'radio') {
+          formGroup.appendChild(input);
+      }
+
+      return formGroup;
+  }
+
+  const formContainer = document.getElementById('form-container');
+  const form = document.createElement('form');
+  let row;
+  let currentColWidth = 0;
+
+  formConfig.forEach(field => {
+      const inputField = createInputField(field);
+      const colClass = field.class.match(/col-\w+-(\d+)/);
+      const colWidth = colClass ? parseInt(colClass[1]) : 12;
+
+      if (currentColWidth + colWidth > 12) {
+          formContainer.appendChild(row);
+          row = document.createElement('div');
+          row.className = 'row';
+          currentColWidth = 0;
+      }
+
+      if (!row) {
+          row = document.createElement('div');
+          row.className = 'row';
+      }
+
+      currentColWidth += colWidth;
+      row.appendChild(inputField);
   });
-  
-  document.addEventListener("DOMContentLoaded", function () {
-    //const tabContent = document.querySelector('#tabContent');
-  
-    let tabCount = 1;
-  
-    const mainContent = document.querySelector("main");
-    //const navTabs = document.querySelector('#navTabs');
-  
-    // Função para carregar a página no main
-    /*function loadPage(html) {
-     //mainContent.innerHTML = html;
-  
-    }*/
-    const navTabs = document.querySelector("#navTabs");
-  
-    function loadPage(id,html) {
-  
-      if(document.querySelector(`#navTabs a[data-nome="${id}"]`)){
-          alert()
-          
-          const existingTab = document.querySelector(`#navTabs a[data-nome="${id}"]`);
-              $(existingTab).tab('show');
-              return;
-      }
-  
-      //debugger;
-      console.log(html)
-      // Criar nova aba
-      const tabId = `tab-${tabCount}`;
-      const tabContentId = `tabContent-${tabCount}`;
-      const newTab = document.createElement("li");
-      newTab.classList.add("nav-item.active");
-      newTab.innerHTML = `
-          <button class="nav-link" data-nome="${id}" id="${tabId}" data-toggle="tab" 
-          href="#${tabContentId}" role="tab" aria-controls="${tabContentId}" 
-          aria-selected="true">
-              ${id} <button type="button" class="close" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-              </button>
-          </button>`;
-      navTabs.appendChild(newTab);
-  
-      // Adicionar conteúdo da página à nova aba
-      const newTabContent = document.createElement("div");
-      newTabContent.classList.add("tab-pane", "fade");
-      /*if (tabCount === 0) {
-        newTabContent.classList.add("show", "active");
-      }*/
-  
-      //newTabContent.classList.add("show", "success");
-      if (navTabs.querySelector('a.nav-link')) {
-                  $(navTabs.querySelectorAll('a.nav-link:last-child')).tab('show');
-              }
-      newTabContent.id = tabContentId;
-      newTabContent.setAttribute("role", "btn-success");
-      newTabContent.innerHTML = html;
-      document.getElementById("tabContent").appendChild(newTabContent);
-  
-      // Ativar a nova aba
-      $(`#${tabId}`).tab("show");
-      tabCount++;
-  
-      // Adicionar evento de fechar aba
-  
-      
-      newTab.querySelector(".close").addEventListener("click", function () {
-        const tab = document.getElementById(tabContentId);
-        tab.parentNode.removeChild(tab);
-  
-        newTab.parentNode.removeChild(newTab);
-        if (navTabs.querySelectorAll('a.nav-link')) {
-          
-          $(navTabs.querySelector('a.nav-link:last-child')).tab('show');
-      }
-  
-        // Se não houver mais abas, carregar uma nova página no main
-        if (tabCount === 0) {
-          //loadRandomPage();
-        }
-      });
-    }
-  
-    // Função para adicionar um item de menu e aba correspondente
-    /*function addMenuItemAndTab(title, content) {
-         // Adiciona o item de menu
-         const menuItem = document.createElement('li');
-         menuItem.classList.add('nav-item');
-         menuItem.innerHTML = `
-             <a class="nav-link" href="#tab-${tabCount}" data-toggle="tab" role="tab" aria-controls="tab-${tabCount}" aria-selected="true">${title}</a>
-         `;
-         menuItems.appendChild(menuItem);
-  
-         // Adiciona a aba correspondente
-         const tabPane = document.createElement('div');
-         tabPane.classList.add('tab-pane', 'fade');
-         if (tabCount === 0) {
-             tabPane.classList.add('show', 'active');
-         }
-         tabPane.id = `tab-${tabCount}`;
-         tabPane.setAttribute('role', 'tabpanel');
-         tabPane.innerHTML = content;
-         tabContent.appendChild(tabPane);
-  
-         tabCount++;
-  
-    }*/
-  
-    // Mapeamento dos HTMLs para cada item do submenu
-    const pages=[
-      {
-          id:'new_order',
-          content:"<h2>Dashboard</h2><p>This is the Dashboard page.</p>",
-      },
-      {
-          id:'new_order2',
-          content:"<h2>Dasjhjjhboard</h2><p>This is the Dashboard page.</p>",
-      },
-      {
-          id:'new_order3',
-          content:"<h2>Dasjhjjhboard</h2><p>This is the Dashboard page.</p>",
-      }
-    ];
-    
-  
-    // Adiciona o manipulador de evento de clique aos links do submenu
-    document.querySelectorAll(".submenu.nav-link").forEach((link) => {
-      link.addEventListener("click", function (event) {
-        event.preventDefault(); // Evita que o link seja seguido normalmente
-        // const pageId = link;
-        const pageId = link.getAttribute("href");
-        console.log(pageId);
-        //loadPage(pages[pageId]);
-  
-        //addMenuItemAndTab(pageId, pages[pageId])
-        loadPage(pageId,pages.find(e=>e.id == pageId).content);
-      });
-    });
-  
-    // Carrega uma página predefinida ao iniciar
-    //const initialPageId = "dashboard"; // Defina a página inicial aqui
-    //loadPage(pages[initialPageId]);
-  });
-  
+
+  if (row) {
+      formContainer.appendChild(row);
+  }
+
+  formContainer.appendChild(form);
+});

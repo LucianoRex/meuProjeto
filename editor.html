@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor HTML, CSS e JavaScript</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .editor-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px;
+        }
+        textarea {
+            flex: 1;
+            margin: 5px 0;
+            font-family: monospace;
+            resize: none;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        iframe {
+            flex-grow: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-md-6 d-flex flex-column">
+                <div class="editor-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Editor HTML, CSS e JavaScript</h5>
+                    <div class="d-flex">
+                        <input type="file" id="fileInput" accept=".html" class="btn btn-outline-primary btn-sm mr-2">
+                        <input type="text" id="urlInput" class="form-control form-control-sm" placeholder="Insira o URL">
+                        <button id="loadUrl" class="btn btn-outline-primary btn-sm ml-2">Carregar</button>
+                        <input type="number" id="dbInput" class="form-control form-control-sm ml-2" placeholder="ID do Documento">
+                        <button id="loadDb" class="btn btn-outline-primary btn-sm ml-2">Carregar do DB</button>
+                        <button id="saveDb" class="btn btn-outline-success btn-sm ml-2">Salvar no DB</button>
+                    </div>
+                </div>
+                <div class="editor-section p-3">
+                    <div class="form-group">
+                        <label for="title" class="font-weight-bold">Título</label>
+                        <input type="text" id="title" class="form-control" placeholder="Título do Documento">
+                    </div>
+                    <div class="form-group">
+                        <label for="html" class="font-weight-bold">HTML</label>
+                        <textarea id="html" class="form-control" rows="8" placeholder="Escreva seu HTML aqui"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="css" class="font-weight-bold">CSS</label>
+                        <textarea id="css" class="form-control" rows="8" placeholder="Escreva seu CSS aqui"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="js" class="font-weight-bold">JavaScript</label>
+                        <textarea id="js" class="form-control" rows="8" placeholder="Escreva seu JavaScript aqui"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex flex-column">
+                <div class="editor-header">
+                    <h5 class="mb-0">Pré-visualização</h5>
+                </div>
+                <iframe id="preview" class="w-100 flex-grow-1"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const htmlEditor = document.getElementById('html');
+        const cssEditor = document.getElementById('css');
+        const jsEditor = document.getElementById('js');
+        const titleInput = document.getElementById('title');
+        const previewFrame = document.getElementById('preview');
+        const fileInput = document.getElementById('fileInput');
+        const urlInput = document.getElementById('urlInput');
+        const loadUrlButton = document.getElementById('loadUrl');
+        const dbInput = document.getElementById('dbInput');
+        const loadDbButton = document.getElementById('loadDb');
+        const saveDbButton = document.getElementById('saveDb');
+
+        function updatePreview() {
+            const html = htmlEditor.value;
+            const css = '<style>' + cssEditor.value + '</style>';
+            const js = '<script>' + jsEditor.value + '<\/script>';
+            const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            preview.open();
+            preview.write(html + css + js);
+            preview.close();
+        }
+
+        htmlEditor.addEventListener('input', updatePreview);
+        cssEditor.addEventListener('input', updatePreview);
+        jsEditor.addEventListener('input', updatePreview);
+
+        // Função para ler o arquivo HTML e carregar nos editores
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const contents = e.target.result;
+                    const doc = new DOMParser().parseFromString(contents, 'text/html');
+
+                    // Carregar HTML
+                    htmlEditor.value = doc.documentElement.innerHTML;
+                    // Carregar CSS
+                    const css = Array.from(doc.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
+                    cssEditor.value = css;
+                    // Carregar JavaScript
+                    const js = Array.from(doc.querySelectorAll('script')).map(script => script.innerHTML).join('\n');
+                    jsEditor.value = js;
+
+                    updatePreview();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Função para carregar o arquivo HTML a partir de um URL e carregar nos editores
+        loadUrlButton.addEventListener('click', function() {
+            const url = urlInput.value;
+            if (url) {
+                fetch(url)
+                    .then(response => response.text())
+                    .then(contents => {
+                        const doc = new DOMParser().parseFromString(contents, 'text/html');
+
+                        // Carregar HTML
+                        htmlEditor.value = doc.documentElement.innerHTML;
+                        // Carregar CSS
+                        const css = Array.from(doc.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
+                        cssEditor.value = css;
+                        // Carregar JavaScript
+                        const js = Array.from(doc.querySelectorAll('script')).map(script => script.innerHTML).join('\n');
+                        jsEditor.value = js;
+
+                        updatePreview();
+                    })
+                    .catch(error => console.error('Erro ao carregar o URL:', error));
+            }
+        });
+
+        // Função para carregar o documento HTML do banco de dados e carregar nos editores
+        loadDbButton.addEventListener('click', function() {
+            const id = dbInput.value;
+            if (id) {
+                fetch(`http://localhost:3000/document/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Carregar Título
+                        titleInput.value = data.title;
+                        // Carregar HTML
+                        htmlEditor.value = data.html;
+                        // Carregar CSS
+                        cssEditor.value = data.css;
+                        // Carregar JavaScript
+                        jsEditor.value = data.js;
+
+                        updatePreview();
+                    })
+                    .catch(error => console.error('Erro ao carregar o documento do banco de dados:', error));
+            }
+        });
+
+        // Função para salvar o documento HTML no banco de dados
+        saveDbButton.addEventListener('click', function() {
+            const id = dbInput.value;
+            const title = titleInput.value;
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            const js = jsEditor.value;
+
+            fetch('http://localhost:3000/document', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, title, html, css, js })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Erro ao salvar o documento:', data.error);
+                    } else {
+                        console.log('Documento salvo com sucesso:', data);
+                        if (!id) {
+                            dbInput.value = data.id;
+                        }
+                    }
+                })
+                .catch(error => console.error('Erro ao salvar o documento:', error));
+        });
+
+        // Atualiza a pré-visualização ao carregar a página
+        updatePreview();
+    </script>
+</body>
+</html>

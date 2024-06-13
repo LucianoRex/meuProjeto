@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX Request with Fetch</title>
+    <script>
+        function makeRequest() {
+            var url = "https://jsonplaceholder.typicode.com/posts";
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("response").innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <button onclick="makeRequest()">Make AJAX Request</button>
+    <pre id="response"></pre>
+</body>
+</html>

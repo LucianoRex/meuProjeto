@@ -101,7 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const navTabs = document.querySelector("#navTabs");
   
     function loadPage(id,html) {
-  
+      //debugger
+        
       if(document.querySelector(`#navTabs button[data-nome="${id}"]`)){
           
           const existingTab = document.querySelector(`#navTabs button[data-nome="${id}"]`);
@@ -129,9 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Adicionar conteúdo da página à nova aba
       const newTabContent = document.createElement("div");
       newTabContent.classList.add("tab-pane", "fade");
-      if (tabCount === 0) {
-        //newTabContent.classList.add("show", "active");
-      }
+      
   
       //newTabContent.classList.add("active");
       if (navTabs.querySelector('a.nav-link')) {
@@ -158,11 +157,17 @@ document.addEventListener("DOMContentLoaded", function () {
           
           $(navTabs.querySelectorAll('button.nav-link:last-child')).tab('show');
       }
+      
   
         // Se não houver mais abas, carregar uma nova página no main
-        if (tabCount === 0) {
-          //loadRandomPage();
+        //debugger
+        //tabCount--;
+        if (tabCount === 1) {
+          
+            //document.getElementById("mainContent").innerHTML='<h1>Bem vindo</h1>'
         }
+
+        
       });
     }
   

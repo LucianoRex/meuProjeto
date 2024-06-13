@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Formulário</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 id="form-title"></h2>
+        <div id="form-container"></div>
+        <div id="table-container"></div>
+        <div class="mt-5">
+            <h2>Tabela de Dados</h2>
+            <table class="table" id="data-table">
+                <thead>
+                    <tr>
+                        <th data-column="nome">Nome</th>
+                        <th data-column="email">Email</th>
+                        <th data-column="senha">Senha</th>
+                        <th data-column="mensagem">Mensagem</th>
+                        <th data-column="genero">Gênero</th>
+                        <th data-column="interesses">Interesses</th>
+                        <th data-column="plano">Plano</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="form-generator.js"></script>
+</body>
+</html>

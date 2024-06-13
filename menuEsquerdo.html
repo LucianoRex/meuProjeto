@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Sidebar Menu</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .submenu {
+      display: none;
+      margin-left: 20px;
+    }
+    .list-group-item {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="d-flex">
+  <div class="bg-light border" id="sidebar" style="width: 250px;"></div>
+  <div class="p-4" id="content">
+    <h1>Main Content Area</h1>
+  </div>
+</div>
+
+<script>
+const menuData = [
+  { id: 1, title: 'Home', caminho: '' },
+  { id: 2, title: 'Phones', caminho: 'Products/Electronics/Phones' },
+  { id: 3, title: 'Laptops', caminho: 'Products/Electronics/Laptops' },
+  { id: 3, title: 'Acolhido', caminho: 'Acolhimento/Acolhido2' },
+  { id: 4, title: 'Washing Machines', caminho: 'Products/Home Appliances/Washing Machines' },
+  { id: 5, title: 'Refrigerators', caminho: 'Products/Home Appliances/Refrigerators' },
+  { id: 6, title: 'About', caminho: '' },
+  { id: 7, title: 'Contact', caminho: '' }
+];
+
+function transformMenuData(menuData) {
+  const transformedData = {};
+
+  menuData.forEach(item => {
+    const parts = item.caminho.split('/');
+    let currentLevel = transformedData;
+
+    parts.forEach((part, index) => {
+      if (!currentLevel[part]) {
+        currentLevel[part] = {};
+      }
+      if (index === parts.length - 1) {
+        currentLevel[part]._title = item.title;
+        currentLevel[part]._id = item.id;
+      }
+      currentLevel = currentLevel[part];
+    });
+  });
+
+  return transformedData;
+}
+
+function createMenu(menuData, parentElement) {
+  const ul = document.createElement('ul');
+  ul.className = 'list-group list-group-flush';
+
+  for (const key in menuData) {
+    if (key.startsWith('_')) continue;
+
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+
+    const title = menuData[key]._title || key;
+    li.textContent = title;
+
+    const hasSubmenus = Object.keys(menuData[key]).some(k => !k.startsWith('_'));
+
+    li.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (hasSubmenus) {
+        const submenu = li.querySelector('.submenu');
+        if (submenu) {
+          submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+        }
+      } else {
+        alert(`Clicked on ${title}, ID: ${menuData[key]._id}`);
+      }
+    });
+
+    if (hasSubmenus) {
+      const submenu = document.createElement('div');
+      submenu.className = 'submenu';
+      submenu.style.display = 'none'; // Ensure the submenu starts hidden
+      createMenu(menuData[key], submenu);
+      li.appendChild(submenu);
+    }
+
+    ul.appendChild(li);
+  }
+
+  parentElement.appendChild(ul);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const transformedData = transformMenuData(menuData);
+  const sidebar = document.getElementById('sidebar');
+  createMenu(transformedData, sidebar);
+});
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
