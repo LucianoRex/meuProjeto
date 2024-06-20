@@ -50,7 +50,52 @@
   min-height: 100vh;
   height: auto;
 }*/
-      </style>
+
+/* Estilos para o Menu Esquerdo */
+#menuItems {
+    
+}
+
+#menuItems .nav-link {
+    color: #f8f9fa; /* Cor do texto dos links */
+    font-weight: 500; /* Peso da fonte */
+    padding: 10px 20px; /* Espaçamento interno dos links */
+    transition: background-color 0.3s ease; /* Transição suave de cor de fundo */
+}
+
+#menuItems .nav-link.active {
+    background-color: #495057; /* Cor de fundo do link ativo */
+    border-radius: 5px; /* Borda arredondada para o link ativo */
+}
+
+#menuItems .nav-link:hover {
+    background-color: #495057; /* Cor de fundo ao passar o mouse */
+    text-decoration: none; /* Remover sublinhado */
+}      
+/* Estilos para a Tela de Boas-Vindas */
+#welcomeScreen {
+    background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
+    background-blend-mode: overlay; /* Modo de mistura para a sobreposição */
+    padding: 40px; /* Espaçamento interno */
+    text-align: center; /* Centralizar texto */
+}
+
+.text-white {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Sombra suave no texto branco */
+}
+
+.btn-primary {
+    background-color: #007bff; /* Cor de fundo do botão */
+    border-color: #007bff; /* Cor da borda do botão */
+}
+
+.btn-primary:hover {
+    background-color: #0069d9; /* Cor de fundo ao passar o mouse */
+    border-color: #0062cc; /* Cor da borda ao passar o mouse */
+}
+
+
+</style>
 </head>
 
 <body>
@@ -63,7 +108,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="http://127.0.0.1:5500/editor.html">Editor <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Features</a>
@@ -80,7 +125,13 @@
 
     
 
-    <div class="container-fluid">
+    <!--div class="container-fluid">
+      <div id="welcomeScreen" class="jumbotron">
+        <h1 class="display-4">Bem-vindo!</h1>
+        <p class="lead">Este é o conteúdo da tela de boas-vindas.</p>
+        <hr class="my-4">
+        <p>Aqui você pode adicionar conteúdo personalizado para a tela de boas-vindas.</p>
+    </div-->
 
         <div class="row">
             <!-- Menu Esquerdo -->
@@ -100,32 +151,19 @@
                   <span class="sr-only">Loading...</span>
                 </div>
               </div> 
-                <div class="container mt-4">
-                    <ul class="nav nav-tabs" id="navTabs" role="tablist">
-                      <!--li class="nav-item">
-                        <a class="nav-link active" id="tab-0" data-toggle="tab" href="#tabContent-0" role="tab" aria-controls="tabContent-0" aria-selected="true">Main</a>
-                      </li>-->
-                    </ul>
-                    <div class="tab-content" id="tabContent">
-                      <div class="tab-pane fade show active" id="tabContent-0" role="tabpanel" aria-labelledby="tab-0">
-                        <main id="mainContent"></main>
-                      </div>
-                    </div>
-                  </div>
+              
+              <div class="container mt-4">
+                <ul class="nav nav-tabs"  style="border-bottom: 0px;" id="navTabs" role="tablist">
+                  <!-- As abas serão adicionadas dinamicamente aqui -->
+                </ul>
+                <div class="tab-content" id="tabContent">
+                  
+                  <!-- O conteúdo das abas será adicionado dinamicamente aqui -->
+                </div>
+              </div>
                 
 
-                <!--<nav>
-                    <div class="nav nav-tabs" id="navTabs" role="tablist">
-                      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
-                      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Perfil</a>
-                      <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contato</a>
-                    </div>
-                  </nav>
-                  <div class="tab-content" id="tabContent">
-                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
-                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">...</div>
-                    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
-                  </div>-->
+                  
                 
                 
             </main>

@@ -37,6 +37,24 @@
             border: 1px solid #dee2e6;
             border-radius: 0.25rem;
         }
+        .spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
     </style>
 </head>
 <body>
@@ -46,18 +64,24 @@
                 <div class="editor-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Editor HTML, CSS e JavaScript</h5>
                     <div class="d-flex">
-                        <input type="file" id="fileInput" accept=".html" class="btn btn-outline-primary btn-sm mr-2">
-                        <input type="text" id="urlInput" class="form-control form-control-sm" placeholder="Insira o URL">
-                        <button id="loadUrl" class="btn btn-outline-primary btn-sm ml-2">Carregar</button>
-                        <input type="number" id="dbInput" class="form-control form-control-sm ml-2" placeholder="ID do Documento">
-                        <button id="loadDb" class="btn btn-outline-primary btn-sm ml-2">Carregar do DB</button>
-                        <button id="saveDb" class="btn btn-outline-success btn-sm ml-2">Salvar no DB</button>
+                        <input type="number" id="dbInput" class="form-control form-control-sm mr-2" placeholder="ID do Documento">
+                        <button id="loadDb" class="btn btn-outline-primary btn-sm mr-2">Carregar do DB</button>
+                        <button id="saveDb" class="btn btn-outline-success btn-sm mr-2">Salvar no DB</button>
+                        <button id="openModal" class="btn btn-outline-info btn-sm">Abrir Lista</button>
                     </div>
                 </div>
                 <div class="editor-section p-3">
                     <div class="form-group">
-                        <label for="title" class="font-weight-bold">Título</label>
-                        <input type="text" id="title" class="form-control" placeholder="Título do Documento">
+                        <label for="id" class="font-weight-bold">_id</label>
+                        <input type="text" id="id" class="form-control" placeholder="ID do Documento" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="nome" class="font-weight-bold">Nome</label>
+                        <input type="text" id="nome" class="form-control" placeholder="Nome do Documento">
+                    </div>
+                    <div class="form-group">
+                        <label for="caminho" class="font-weight-bold">Caminho</label>
+                        <input type="text" id="caminho" class="form-control" placeholder="Caminho do Documento">
                     </div>
                     <div class="form-group">
                         <label for="html" class="font-weight-bold">HTML</label>
@@ -82,6 +106,52 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="documentListModal" tabindex="-1" role="dialog" aria-labelledby="documentListModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentListModalLabel">Lista de Documentos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Caminho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentList">
+                            <!-- Conteúdo será inserido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner e Alert -->
+    <div class="spinner-container" id="spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <div class="alert-container">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="saveAlert" style="display: none;">
+            Documento salvo com sucesso!
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -91,76 +161,35 @@
         const htmlEditor = document.getElementById('html');
         const cssEditor = document.getElementById('css');
         const jsEditor = document.getElementById('js');
-        const titleInput = document.getElementById('title');
+        const idInput = document.getElementById('id');
+        const nameInput = document.getElementById('nome');
+        const pathInput = document.getElementById('caminho');
         const previewFrame = document.getElementById('preview');
-        const fileInput = document.getElementById('fileInput');
-        const urlInput = document.getElementById('urlInput');
-        const loadUrlButton = document.getElementById('loadUrl');
         const dbInput = document.getElementById('dbInput');
         const loadDbButton = document.getElementById('loadDb');
         const saveDbButton = document.getElementById('saveDb');
+        const openModalButton = document.getElementById('openModal');
+        const documentList = document.getElementById('documentList');
+        const spinner = document.getElementById('spinner');
+        const saveAlert = document.getElementById('saveAlert');
 
         function updatePreview() {
             const html = htmlEditor.value;
             const css = '<style>' + cssEditor.value + '</style>';
             const js = '<script>' + jsEditor.value + '<\/script>';
+            const bootstrapCSS = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">';
+            const bootstrapJS = '<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"><\/script>' +
+                                '<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"><\/script>' +
+                                '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"><\/script>';
             const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
             preview.open();
-            preview.write(html + css + js);
+            preview.write(bootstrapCSS + html + css + js + bootstrapJS);
             preview.close();
         }
 
         htmlEditor.addEventListener('input', updatePreview);
         cssEditor.addEventListener('input', updatePreview);
         jsEditor.addEventListener('input', updatePreview);
-
-        // Função para ler o arquivo HTML e carregar nos editores
-        fileInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const contents = e.target.result;
-                    const doc = new DOMParser().parseFromString(contents, 'text/html');
-
-                    // Carregar HTML
-                    htmlEditor.value = doc.documentElement.innerHTML;
-                    // Carregar CSS
-                    const css = Array.from(doc.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
-                    cssEditor.value = css;
-                    // Carregar JavaScript
-                    const js = Array.from(doc.querySelectorAll('script')).map(script => script.innerHTML).join('\n');
-                    jsEditor.value = js;
-
-                    updatePreview();
-                };
-                reader.readAsText(file);
-            }
-        });
-
-        // Função para carregar o arquivo HTML a partir de um URL e carregar nos editores
-        loadUrlButton.addEventListener('click', function() {
-            const url = urlInput.value;
-            if (url) {
-                fetch(url)
-                    .then(response => response.text())
-                    .then(contents => {
-                        const doc = new DOMParser().parseFromString(contents, 'text/html');
-
-                        // Carregar HTML
-                        htmlEditor.value = doc.documentElement.innerHTML;
-                        // Carregar CSS
-                        const css = Array.from(doc.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
-                        cssEditor.value = css;
-                        // Carregar JavaScript
-                        const js = Array.from(doc.querySelectorAll('script')).map(script => script.innerHTML).join('\n');
-                        jsEditor.value = js;
-
-                        updatePreview();
-                    })
-                    .catch(error => console.error('Erro ao carregar o URL:', error));
-            }
-        });
 
         // Função para carregar o documento HTML do banco de dados e carregar nos editores
         loadDbButton.addEventListener('click', function() {
@@ -169,8 +198,12 @@
                 fetch(`http://localhost:3000/document/${id}`)
                     .then(response => response.json())
                     .then(data => {
-                        // Carregar Título
-                        titleInput.value = data.title;
+                        // Carregar _id
+                        idInput.value = data._id;
+                        // Carregar Nome
+                        nameInput.value = data.name;
+                        // Carregar Caminho
+                        pathInput.value = data.path;
                         // Carregar HTML
                         htmlEditor.value = data.html;
                         // Carregar CSS
@@ -186,31 +219,74 @@
 
         // Função para salvar o documento HTML no banco de dados
         saveDbButton.addEventListener('click', function() {
-            const id = dbInput.value;
-            const title = titleInput.value;
+            const _id = idInput.value;
+            const nome = nameInput.value;
+            const caminho = pathInput.value;
             const html = htmlEditor.value;
             const css = cssEditor.value;
             const js = jsEditor.value;
 
-            fetch('http://localhost:3000/document', {
+            // Mostrar spinner
+            spinner.style.display = 'flex';
+
+            fetch('http://localhost:3000/telas', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id, title, html, css, js })
+                body: JSON.stringify({ _id, nome, caminho, html, css, js })
             })
                 .then(response => response.json())
                 .then(data => {
+                    spinner.style.display = 'none'; // Ocultar spinner
+
                     if (data.error) {
                         console.error('Erro ao salvar o documento:', data.error);
                     } else {
                         console.log('Documento salvo com sucesso:', data);
-                        if (!id) {
-                            dbInput.value = data.id;
+                        if (!_id) {
+                            idInput.value = data._id;
                         }
+                        saveAlert.style.display = 'block'; // Mostrar mensagem de sucesso
+                        setTimeout(() => {
+                            saveAlert.style.display = 'none'; // Ocultar mensagem após 3 segundos
+                        }, 3000);
                     }
                 })
-                .catch(error => console.error('Erro ao salvar o documento:', error));
+                .catch(error => {
+                    spinner.style.display = 'none'; // Ocultar spinner
+                    console.error('Erro ao salvar o documento:', error);
+                });
+        });
+
+        // Função para abrir o modal e carregar a lista de documentos
+        openModalButton.addEventListener('click', function() {
+            fetch('http://localhost:3000/lista-telas')
+                .then(response => response.json())
+                .then(data => {
+                    documentList.innerHTML = '';
+                    data.forEach(doc => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${doc._id}</td>
+                            <td>${doc.nome}</td>
+                            <td>${doc.caminho}</td>
+                        `;
+                        row.addEventListener('click', function() {
+                            idInput.value = doc._id;
+                            nameInput.value = doc.nome;
+                            pathInput.value = doc.caminho;
+                            htmlEditor.value = doc.html;
+                            cssEditor.value = doc.css;
+                            jsEditor.value = doc.js;
+                            updatePreview();
+                            $('#documentListModal').modal('hide');
+                        });
+                        documentList.appendChild(row);
+                    });
+                    $('#documentListModal').modal('show');
+                })
+                .catch(error => console.error('Erro ao carregar a lista de documentos:', error));
         });
 
         // Atualiza a pré-visualização ao carregar a página

@@ -1,100 +1,144 @@
-let tabCount = 1;
+const menuItems = document.querySelector('#menuItems');
+    const navTabs = document.querySelector('#navTabs');
+    const tabContent = document.querySelector('#tabContent');
+    let tabCount = 0; // Contador de abas
 
-const navTabs = document.querySelector("#navTabs");
+    // Função para carregar página em uma aba
+    function loadPage(id, html, css, javascript) {
+        // Verifica se a aba já existe
+        if (document.querySelector(`#navTabs button[data-nome="${id}"]`)) {
+            const existingTab = document.querySelector(`#navTabs button[data-nome="${id}"]`);
+            $(existingTab).tab('show');
+            return;
+        }
 
-function loadPage(id, html,javascript) {
-  if (document.querySelector(`#navTabs button[data-nome="${id}"]`)) {
-    const existingTab = document.querySelector(
-      `#navTabs button[data-nome="${id}"]`
-    );
-    $(existingTab).tab("show");
-    return;
-  }
+        // Criar IDs únicos para a aba e o conteúdo da aba
+        const tabId = `tab-${tabCount}`;
+        const tabContentId = `tabContent-${tabCount}`;
 
-  // Criar nova aba
-  const tabId = `tab-${tabCount}`;
-  const tabContentId = `tabContent-${tabCount}`;
-  const newTab = document.createElement("li");
-  newTab.classList.add("nav-item");
-  newTab.innerHTML = `
-          <button class="nav-link" data-nome="${id}" id="${tabId}" data-toggle="tab" 
-          href="#${tabContentId}" role="tab" aria-controls="${tabContentId}" 
-          aria-selected="true">
-              ${id}<button type="button" class="close" aria-label="Close">
-              <span aria-hidden="true" style="margin-left: 10px;">&times;</span>
-            </button>
-          </button>`;
-  navTabs.appendChild(newTab);
+        // Criar nova aba no navbar
+        const newTab = document.createElement('li');
+        newTab.classList.add('nav-item');
+        newTab.innerHTML = `
+            <button class="nav-link" data-nome="${id}" id="${tabId}" data-toggle="tab" href="#${tabContentId}" role="tab" aria-controls="${tabContentId}" aria-selected="true">
+                ${id}
+                <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </button>`;
+        navTabs.appendChild(newTab);
 
-  // Adicionar conteúdo da página à nova aba
-  const newTabContent = document.createElement("div");
-  newTabContent.classList.add("tab-pane", "fade");
+        // Criar conteúdo da aba
+        const newTabContent = document.createElement('div');
+        newTabContent.classList.add('tab-pane', 'fade');
+        newTabContent.id = tabContentId;
+        newTabContent.innerHTML = html;
 
-  //newTabContent.classList.add("active");
-  if (navTabs.querySelector("a.nav-link")) {
-    $(navTabs.querySelectorAll("a.nav-link:last-child")).tab("show");
-  }
-  newTabContent.id = tabContentId;
-  //newTabContent.setAttribute("role", "btn-success");
-  newTabContent.innerHTML = html;
-console.log(javascript)
-  var newScript = document.createElement("script");
-  var inlineScript = document.createTextNode(javascript);
-  newScript.appendChild(inlineScript);
-  document.body.appendChild(newScript);
+        // Adicionar estilo CSS ao conteúdo da aba
+        const style = document.createElement('style');
+        style.textContent = `#${tabContentId} {${css}}`;
+        newTabContent.appendChild(style);
 
-  //document.body.appendChild(script);
-  document.getElementById("tabContent").appendChild(newTabContent);
+        // Adicionar script JavaScript ao conteúdo da aba
+        const script = document.createElement('script');
+        script.textContent = javascript;
+        newTabContent.appendChild(script);
 
-  // Ativar a nova aba
-  $(`#${tabId}`).tab("show");
-  tabCount++;
+        // Adicionar conteúdo da aba à área de conteúdo
+        tabContent.appendChild(newTabContent);
 
-  // Adicionar evento de fechar aba
+        // Ativar a nova aba
+        $(`#${tabId}`).tab('show');
+        tabCount++;
 
-  newTab.querySelector(".close").addEventListener("click", function () {
-    const tab = document.getElementById(tabContentId);
-    tab.parentNode.removeChild(tab);
-
-    newTab.parentNode.removeChild(newTab);
-    console.log(newTab.parentNode);
-    if (navTabs.querySelector("button.nav-link")) {
-      $(navTabs.querySelector("button.nav-link:last-child")).tab("show");
-      //$(navTabs.lastElementChild.querySelector('.nav-link')).tab('show')
+        // Ocultar tela de boas-vindas se houver abas abertas
+        hideWelcomeScreen();
     }
 
-    // Se não houver mais abas, carregar uma nova página no main
+    // Função para ocultar tela de boas-vindas
+    function hideWelcomeScreen() {
+        const welcomeScreen = document.querySelector('#welcomeScreen');
+        if (welcomeScreen) {
+            
+            welcomeScreen.setAttribute('style','display:none !important');
+            
+        }
+    }
+
+    // Função para exibir tela de boas-vindas se não houver abas abertas
+    function showWelcomeScreen() {
+        const welcomeScreen = document.querySelector('#welcomeScreen');
+        if (welcomeScreen) {
+            welcomeScreen.style.display = 'block';
+        }
+    }
+
+    // Função para carregar tela de boas-vindas
+    function loadWelcomeScreen() {
+        const welcomeHtml = `
+      <div id="welcomeScreen" class="container-fluid d-flex align-items-center justify-content-center vh-100" style="background-image: url('https://via.placeholder.com/1500x1000'); background-size: cover; background-position: center; display: none;">
+    <div class="text-center text-white">
+        <h1 class="display-4 mb-4">Bem-vindo ao Sistema ERP</h1>
+        <p class="lead mb-5">Este é o conteúdo da tela de boas-vindas do Sistema ERP.</p>
+        <a href="#" class="btn btn-primary btn-lg">Começar</a>
+    </div>
+</div>
+
+
+        `;
+        tabContent.innerHTML = welcomeHtml;
+    }
+
+    // Evento de clique para itens de menu (exemplo)
+    menuItems.addEventListener('click', function(event) {
+        if (event.target.tagName === 'A') {
+            const title = event.target.textContent.trim();
+            const content = `<h2>Conteúdo do ${title}</h2><p>Este é o conteúdo do ${title.toLowerCase()}.</p>`;
+            loadPage(title, content, '', '');
+        }
+    });
+
+    // Evento para gerenciar a aba ativa
+    $('#navTabs').on('shown.bs.tab', 'button[data-toggle="tab"]', function (e) {
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Ocultar tela de boas-vindas ao abrir uma aba
+        hideWelcomeScreen();
+    });
+
+    // Carregar tela de boas-vindas inicialmente se não houver abas abertas
     if (tabCount === 0) {
-      // alert()
-      //document.getElementById("mainContent").innerHTML='<h1>lsdjsnf</h1>'
+        loadWelcomeScreen();
+        
     }
-  });
-}
 
-// Mapeamento dos HTMLs para cada item do submenu
-const pages = [
-  {
-    id: "new_order",
-    content: "<h2>Dashboard</h2><p>This is the Dashboard page.</p>",
-  },
-  {
-    id: "new_order2",
-    content: "<h2>order 2</h2><p>This is the Dashboard page.</p>",
-  },
-  {
-    id: "new_order3",
-    content: "<h2>Order 3</h2><p>This is the Dashboard page.</p>",
-  },
-  {
-    id: "new_order4",
-    content: "<h2>Order 3</h2><p>This is the Dashboard page.</p>",
-  },
-  {
-    id: "new_order5",
-    content: "<h2>Order 3</h2><p>This is the Dashboard page.</p>",
-  },
-  {
-    id: "new_order6",
-    content: "<h2>Order 3</h2><p>This is the Dashboard page.</p>",
-  },
-];
+    // Adicionar evento de fechar aba
+    navTabs.addEventListener('click', function(event) {
+        if (event.target.closest('.close')) {
+            const tabId = event.target.closest('.nav-item').querySelector('.nav-link').id;
+            const tabContentId = event.target.closest('.nav-item').querySelector('.nav-link').getAttribute('href').substr(1);
+            const tabs = Array.from(navTabs.querySelectorAll('.nav-link'));
+            const index = tabs.findIndex(tab => tab.id === tabId);
+
+            const tab = document.getElementById(tabContentId);
+            tab.parentNode.removeChild(tab); // Remover conteúdo da aba
+            event.target.closest('.nav-item').parentNode.removeChild(event.target.closest('.nav-item')); // Remover aba do navbar
+
+            // Ativar aba anterior se existir
+            if (index > 0) {
+                const previousTabId = tabs[index - 1].id;
+                $(`#${previousTabId}`).tab('show');
+            } else if (tabs.length > 0) {
+                const lastTabId = tabs[tabs.length - 1].id;
+                $(`#${lastTabId}`).tab('show');
+                showWelcomeScreen()
+
+            }
+
+            // Exibir tela de boas-vindas se não houver mais abas
+            /*if (tabs.length === 0) {
+                showWelcomeScreen();
+            }*/
+        }
+    });

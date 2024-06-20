@@ -45,7 +45,7 @@
           currentLevel[part] = {};
         }
         if (index === parts.length - 1) {
-          currentLevel[part]._title = item.title;
+          currentLevel[part]._nome = item.nome;
           currentLevel[part]._id = item._id;
         }
         currentLevel = currentLevel[part];
@@ -65,8 +65,8 @@
       const li = document.createElement('li');
       li.className = 'list-group-item';
   
-      const title = menuData[key]._title || key;
-      li.textContent = title;
+      const nome = menuData[key]._nome || key;
+      li.textContent = nome;
   
       const hasSubmenus = Object.keys(menuData[key]).some(k => !k.startsWith('_'));
   
@@ -111,7 +111,7 @@ function makeRequest(_id) {
         .then(data => {
             console.log(data)
             //document.getElementById("response").innerText = JSON.stringify(data, null, 2);
-            loadPage(data.title, data.content,data.javascript);
+            loadPage(data.nome, data.html,data.css,data.js);
         
         })
         .catch(error => console.error('Error:', error));
