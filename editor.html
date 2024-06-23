@@ -63,11 +63,11 @@
             <div class="col-md-6 d-flex flex-column">
                 <div class="editor-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Editor HTML, CSS e JavaScript</h5>
-                    <div class="d-flex">
-                        <input type="number" id="dbInput" class="form-control form-control-sm mr-2" placeholder="ID do Documento">
+                    <div class="d-flex">                        
                         <button id="loadDb" class="btn btn-outline-primary btn-sm mr-2">Carregar do DB</button>
                         <button id="saveDb" class="btn btn-outline-success btn-sm mr-2">Salvar no DB</button>
                         <button id="openModal" class="btn btn-outline-info btn-sm">Abrir Lista</button>
+                        <button id="clearFields" class="btn btn-outline-danger btn-sm ml-2">Criar Novo</button>
                     </div>
                 </div>
                 <div class="editor-section p-3">
@@ -169,6 +169,7 @@
         const loadDbButton = document.getElementById('loadDb');
         const saveDbButton = document.getElementById('saveDb');
         const openModalButton = document.getElementById('openModal');
+        const clearFieldsButton = document.getElementById('clearFields');
         const documentList = document.getElementById('documentList');
         const spinner = document.getElementById('spinner');
         const saveAlert = document.getElementById('saveAlert');
@@ -190,6 +191,17 @@
         htmlEditor.addEventListener('input', updatePreview);
         cssEditor.addEventListener('input', updatePreview);
         jsEditor.addEventListener('input', updatePreview);
+
+        // Função para limpar todos os campos do formulário e resetar a pré-visualização
+        clearFieldsButton.addEventListener('click', function() {
+            idInput.value = '';
+            nameInput.value = '';
+            pathInput.value = '';
+            htmlEditor.value = '';
+            cssEditor.value = '';
+            jsEditor.value = '';
+            updatePreview();
+        });
 
         // Função para carregar o documento HTML do banco de dados e carregar nos editores
         loadDbButton.addEventListener('click', function() {
@@ -229,12 +241,12 @@
             // Mostrar spinner
             spinner.style.display = 'flex';
 
-            fetch('http://localhost:3000/telas', {
+            fetch('http://localhost:3000/view', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ _id, nome, caminho, html, css, js })
+                body: JSON.stringify({ _id, nome, caminho,tipo:'tela', html, css, js })
             })
                 .then(response => response.json())
                 .then(data => {
@@ -261,7 +273,7 @@
 
         // Função para abrir o modal e carregar a lista de documentos
         openModalButton.addEventListener('click', function() {
-            fetch('http://localhost:3000/lista-telas')
+            fetch('http://localhost:3000/lista-view')
                 .then(response => response.json())
                 .then(data => {
                     documentList.innerHTML = '';

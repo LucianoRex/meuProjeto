@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário Dinâmico</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 id="formTitle">Título do Formulário</h2>
+        <form id="dynamicForm" onsubmit="event.preventDefault(); saveForm();">
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary mb-3" onclick="loadFromDatabase()">Carregar do Banco de Dados</button>
+                <button type="button" class="btn btn-success mb-3" onclick="saveForm()">Salvar</button>
+                <button type="button" class="btn btn-secondary mb-3" onclick="addField()">Adicionar Campo</button>
+                <button type="submit" class="btn btn-primary mb-3">Enviar</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="schemaName">Schema Name</label>
+                    <input type="text" class="form-control" id="schemaName" placeholder="Nome do Schema">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="caminho">Caminho</label>
+                    <input type="text" class="form-control" id="caminho" placeholder="Caminho">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="nome">Nome</label>
+                    <input type="text" class="form-control" id="nome" placeholder="Nome">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="tipo">Tipo</label>
+                    <input type="text" class="form-control" id="tipo" placeholder="Tipo">
+                </div>
+            </div>
+            <div id="fieldsContainer" class="form-row"></div>
+        </form>
+    </div>
+
+    <script>
+        let fieldCount = 0;
+
+        // Função para remover acentos
+        function removeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        // Função para converter texto em camelCase
+        function toCamelCase(text) {
+            text = removeAccents(text); // Remove acentos
+            return text.trim().replace(/\s(.)/g, function(match, group1) {
+                return group1.toUpperCase();
+            }).replace(/\s/g, '').replace(/^(.)/, function(match, group1) {
+                return group1.toLowerCase();
+            });
+        }
+
+        function addField() {
+            fieldCount++;
+            const fieldsContainer = document.getElementById('fieldsContainer');
+
+            const fieldHTML = `
+                <div class="card mb-3 col-12" id="fieldCard${fieldCount}">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <h5 class="card-title col-md-12" id="fieldName${fieldCount}">Field ${fieldCount}</h5>
+                            <div class="form-group col-md-2">
+                                <label for="type${fieldCount}">Type</label>
+                                <select class="form-control" id="type${fieldCount}" onchange="toggleOptions(${fieldCount})">
+                                    <option value="text">text</option>
+                                    <option value="email">email</option>
+                                    <option value="password">password</option>
+                                    <option value="textArea">textArea</option>
+                                    <option value="select">select</option>
+                                    <option value="checkbox">checkbox</option>
+                                    <option value="radio">radio</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="label${fieldCount}">Label</label>
+                                <input type="text" class="form-control" id="label${fieldCount}" placeholder="Label">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="id${fieldCount}">ID</label>
+                                <input type="text" class="form-control" id="id${fieldCount}" placeholder="ID" readonly>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="placeholder${fieldCount}">Placeholder</label>
+                                <input type="text" class="form-control" id="placeholder${fieldCount}" placeholder="Placeholder">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="class${fieldCount}">Class</label>
+                                <select class="form-control" id="class${fieldCount}">
+                                    <option value="">Selecione...</option>
+                                    <option value="col-md-2">md-2</option>
+                                    <option value="col-md-3">md-3</option>
+                                    <option value="col-md-4">md-4</option>
+                                    <option value="col-md-6">md-6</option>
+                                    <option value="col-md-12">md-12</option>
+                                    <!-- Adicione outras opções conforme necessário -->
+                                </select>
+                            </div>
+                            <div class="form-group col-md-1">
+                                <label for="required${fieldCount}">Required</label>
+                                <select class="form-control" id="required${fieldCount}">
+                                    <option value="false" selected>False</option>
+                                    <option value="true">True</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="fetchOptions${fieldCount}">Fetch Options</label>
+                                <input type="text" class="form-control" id="fetchOptions${fieldCount}" placeholder="Fetch Options">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="params${fieldCount}">Params</label>
+                                <input type="text" class="form-control" id="params${fieldCount}" placeholder="Params">
+                            </div>
+                            <div class="form-group col-md-3" id="optionsContainer${fieldCount}" style="display: none;">
+                                <label for="options${fieldCount}">Options</label>
+                                <textarea class="form-control" id="options${fieldCount}" placeholder="Options (comma separated)"></textarea>
+                            </div>
+                            <div class="form-group col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger" onclick="removeField(${fieldCount})">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            fieldsContainer.insertAdjacentHTML('beforeend', fieldHTML);
+
+            // Adicionar listener para atualizar o ID do campo com camelCase quando o label for alterado
+            const labelInput = document.getElementById(`label${fieldCount}`);
+            const fieldName = document.getElementById(`fieldName${fieldCount}`);
+            const idInput = document.getElementById(`id${fieldCount}`);
+            
+            labelInput.addEventListener('input', function() {
+                fieldName.textContent = this.value.trim();
+                idInput.value = toCamelCase(this.value.trim());
+            });
+        }
+
+        function toggleOptions(fieldCount) {
+            const typeSelect = document.getElementById(`type${fieldCount}`);
+            const optionsContainer = document.getElementById(`optionsContainer${fieldCount}`);
+            if (typeSelect.value === 'select' || typeSelect.value === 'radio' || typeSelect.value === 'checkbox') {
+                optionsContainer.style.display = 'block';
+            } else {
+                optionsContainer.style.display = 'none';
+            }
+        }
+
+        function removeField(fieldId) {
+            const fieldCard = document.getElementById(`fieldCard${fieldId}`);
+            fieldCard.remove();
+
+            // Atualizar números de sequência dos campos restantes
+            for (let i = fieldId + 1; i <= fieldCount; i++) {
+                const currentFieldCard = document.getElementById(`fieldCard${i}`);
+                if (currentFieldCard) {
+                    currentFieldCard.id = `fieldCard${i - 1}`;
+                    const currentId = document.getElementById(`id${i}`);
+                    if (currentId) {
+                        currentId.id = `id${i - 1}`;
+                    }
+                    const currentLabel = document.getElementById(`label${i}`);
+                    if (currentLabel) {
+                        currentLabel.id = `label${i - 1}`;
+                    }
+                    const currentPlaceholder = document.getElementById(`placeholder${i}`);
+                    if (currentPlaceholder) {
+                        currentPlaceholder.id = `placeholder${i - 1}`;
+                    }
+                    const currentClass = document.getElementById(`class${i}`);
+                    if (currentClass) {
+                        currentClass.id = `class${i - 1}`;
+                    }
+                    const currentRequired = document.getElementById(`required${i}`);
+                    if (currentRequired) {
+                        currentRequired.id = `required${i - 1}`;
+                    }
+                    const currentFetchOptions = document.getElementById(`fetchOptions${i}`);
+                    if (currentFetchOptions) {
+                        currentFetchOptions.id = `fetchOptions${i - 1}`;
+                    }
+                    const currentParams = document.getElementById(`params${i}`);
+                    if (currentParams) {
+                        currentParams.id = `params${i - 1}`;
+                    }
+                    const currentOptionsContainer = document.getElementById(`optionsContainer${i}`);
+                    if (currentOptionsContainer) {
+                        currentOptionsContainer.id = `optionsContainer${i - 1}`;
+                    }
+                    const currentOptions = document.getElementById(`options${i}`);
+                    if (currentOptions) {
+                        currentOptions.id = `options${i - 1}`;
+                    }
+                    const currentRemoveButton = document.querySelector(`#fieldCard${i - 1} .btn-danger`);
+                    if (currentRemoveButton) {
+                        currentRemoveButton.setAttribute('onclick', `removeField(${i - 1})`);
+                    }
+                }
+            }
+
+            fieldCount--;
+        }
+
+        function loadFromDatabase() {
+            // Função para carregar dados do banco de dados
+            alert('Carregar dados do banco de dados');
+        }
+
+        async function saveForm() {
+            const formData = {
+                schemaName: document.getElementById('schemaName').value,
+                caminho: document.getElementById('caminho').value,
+                nome: document.getElementById('nome').value,
+                tipo: document.getElementById('tipo').value,
+                fields: []
+            };
+
+            for (let i = 1; i <= fieldCount; i++) {
+                if (document.getElementById(`fieldCard${i}`)) {
+                    const field = {
+                        type: document.getElementById(`type${i}`).value,
+                        name: document.getElementById(`id${i}`).value,
+                        label: document.getElementById(`label${i}`).value,
+                        id: document.getElementById(`id${i}`).value,
+                        placeholder: document.getElementById(`placeholder${i}`).value,
+                        class: document.getElementById(`class${i}`).value,
+                        required: document.getElementById(`required${i}`).value === 'true',
+                        fetchOptions: document.getElementById(`fetchOptions${i}`).value,
+                        params: document.getElementById(`params${i}`).value,
+                        options: document.getElementById(`options${i}`) ? document.getElementById(`options${i}`).value.split(',') : []
+                    };
+                    formData.fields.push(field);
+                }
+            }
+
+            console.log(transformToSchemaConfig(formData));
+
+            try {
+                const response = await fetch('http://localhost:4000/create-schema', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transformToSchemaConfig(formData))
+                });
+
+                if (response.ok) {
+                    alert('Formulário salvo com sucesso!');
+                    alert('Formulário salvo com sucesso!');
+                    // Após o primeiro POST, faz o segundo POST
+                    const response2 = await fetch('http://localhost:3000/view', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response2.ok) {
+                        alert('Formulário enviado com sucesso para create-form!');
+                    } else {
+                        alert('Erro ao enviar formulário para create-form.');
+                    }
+                } else {
+                    alert('Erro ao salvar o formulário.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao salvar o formulário.');
+            }
+        }
+
+                // Função para transformar formConfig em schemaConfig
+                function transformToSchemaConfig(formConfig) {
+            const schemaConfig = {
+                "schemaName": formConfig.schemaName,
+                "fields": []
+            };
+
+            formConfig.fields.forEach(field => {
+                switch (field.type) {
+                    case 'text':
+                    case 'email':
+                    case 'password':
+                    case 'textarea':
+                        schemaConfig.fields.push({ "name": field.id, "type": "String" });
+                        break;
+                    case 'select':
+                    case 'radio':
+                        schemaConfig.fields.push({ "name": field.id, "type": "String" });
+                        break;
+                    case 'checkbox':
+                        schemaConfig.fields.push({ "name": field.id, "type": "Array" });
+                        break;
+                    case 'date':
+                        schemaConfig.fields.push({ "name": field.id, "type": "Date" });
+                        break;                
+                    default:
+                        console.warn(`Tipo de campo '${field.type}' não suportado para schema.`);
+                }
+            });
+
+            // Exemplo de uso:
+
+            return schemaConfig;
+        }
+
+    </script>
+</body>
+</html>

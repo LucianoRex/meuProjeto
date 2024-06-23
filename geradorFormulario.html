@@ -1,37 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Formulário</title>
+    <title>Formulário Dinâmico</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container mt-5">
-        <h2 id="form-title"></h2>
+        <h1 id="form-title"></h1>
         <div id="form-container"></div>
-        <div id="table-container"></div>
-        <div class="mt-5">
-            <h2>Tabela de Dados</h2>
-            <table class="table" id="data-table">
-                <thead>
-                    <tr>
-                        <th data-column="nome">Nome</th>
-                        <th data-column="email">Email</th>
-                        <th data-column="senha">Senha</th>
-                        <th data-column="mensagem">Mensagem</th>
-                        <th data-column="genero">Gênero</th>
-                        <th data-column="interesses">Interesses</th>
-                        <th data-column="plano">Plano</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Selecione um Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="modalItemList"></ul>
+                </div>
+            </div>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="form-generator.js"></script>
+    <script>
+        
+        const formTitle = "Formulário de Cadastro";
+
+            const formConfig = {
+                schemaName: "Cadastro3",
+                fields: [
+                    { type: 'text', label: 'Nome', id: 'nome', placeholder: 'Digite seu nome', class: 'col-md-3', required: true },
+                    { type: 'email', label: 'Email', id: 'email', placeholder: 'Digite seu email', class: 'col-md-3', required: true },
+                    { type: 'password', label: 'Senha', id: 'senha', placeholder: 'Digite sua senha', class: 'col-md-3', required: true },
+                    { type: 'text', label: 'CPF', id: 'cpf', placeholder: 'Digite seu CPF', class: 'col-md-3', required: true, validationFunction: validateCPF },
+                    { type: 'textarea', label: 'Mensagem', id: 'mensagem', placeholder: 'Digite sua mensagem', class: 'col-12', required: false },
+                    { type: 'select', label: 'Gênero', id: 'genero', options: ['Masculino', 'Feminino', 'Outro'], class: 'col-md-6', required: true },
+                    { type: 'select', label: 'Cidade', id: 'cidade', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: fetchCityOptions },
+                    { type: 'checkbox', label: 'Interesses', id: 'interesses', options: [], class: 'col-md-6', required: false, fetchOptionsFunction: fetchCheckboxOptions },
+                    { type: 'radio', label: 'Plano', id: 'plano', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: fetchRadioOptions },
+                    { type: 'date', label: 'Data de Nascimento', id: 'dataNascimento', class: 'col-md-6', required: true },
+                    { type: 'ref', label: 'Selecionar Item', id: 'item', buttonLabel: 'Selecionar', class: 'col-md-6', required: true, fetchOptionsFunction: fetchItems, params: { schema: 'Cliente' } },
+                    { type: 'submit', label: 'Enviar', class: 'col-12', required: false }
+                ]
+            };
+        document.addEventListener("DOMContentLoaded", function () {
+            
+
+            const formContainer = document.getElementById('form-container');
+            const form = document.createElement('form');
+            form.classList.add('row');
+            formConfig.fields.forEach(field => {
+                const inputField = createInputField(field);
+                form.appendChild(inputField);
+            });
+
+            // Adicionando o botão de submit diretamente ao formulário
+            let formGroup = document.createElement('div');
+            formGroup.className = `form-group col-12`;
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.className = 'btn btn-primary';
+            submitButton.textContent = 'Enviar';
+
+            // Evento de submit para o botão
+            submitButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                postFormData();
+            });
+
+            formGroup.appendChild(submitButton);
+            form.appendChild(formGroup);
+            formContainer.appendChild(form);
+
+            const formTitleElement = document.getElementById('form-title');
+            formTitleElement.textContent = formTitle;
+
+            validateForm();
+        });
+
+        function createInputField(field) {
+            let formGroup = document.createElement('div');
+            formGroup.className = `form-group ${field.class}`;
+
+            if (field.type !== 'submit' && field.type !== 'checkbox' && field.type !== 'radio') {
+                let label = document.createElement('label');
+                label.setAttribute('for', field.id);
+                label.textContent = field.label;
+                formGroup.appendChild(label);
+            }
+
+            let input;
+
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'password':
+                case 'date':
+                    input = document.createElement('input');
+                    input.type = field.type;
+                    input.className = 'form-control';
+                    input.id = field.id;
+                    input.placeholder = field.placeholder;
+                    if (field.required) input.required = true;
+                    if (field.validationFunction) input.addEventListener('input', field.validationFunction);
+                    input.addEventListener('input', validateForm);
+                    break;
+                case 'textarea':
+                    input = document.createElement('textarea');
+                    input.className = 'form-control';
+                    input.id = field.id;
+                    input.placeholder = field.placeholder;
+                    if (field.required) input.required = true;
+                    input.addEventListener('input', validateForm);
+                    break;
+                case 'select':
+                    input = document.createElement('select');
+                    input.className = 'form-control';
+                    input.id = field.id;
+                    if (field.required) input.required = true;
+                    input.addEventListener('change', validateForm);
+                    if (field.fetchOptionsFunction) {
+                        field.fetchOptionsFunction(input);
+                    } else {
+                        field.options.forEach(option => {
+                            let optionElement = document.createElement('option');
+                            optionElement.value = option;
+                            optionElement.textContent = option;
+                            input.appendChild(optionElement);
+                        });
+                    }
+                    break;
+                case 'checkbox':
+                    let checkboxLabel = document.createElement('label');
+                    checkboxLabel.className = 'form-label';
+                    checkboxLabel.textContent = field.label;
+                    formGroup.appendChild(checkboxLabel);
+
+                    if (field.fetchOptionsFunction) {
+                        field.fetchOptionsFunction(formGroup, field.id);
+                    } else {
+                        field.options.forEach(option => {
+                            let checkboxWrapper = document.createElement('div');
+                            checkboxWrapper.className = 'form-check';
+
+                            let checkboxInput = document.createElement('input');
+                            checkboxInput.type = 'checkbox';
+                            checkboxInput.className = 'form-check-input';
+                            checkboxInput.name = field.id;
+                            checkboxInput.id = `${field.id}_${option}`;
+                            checkboxInput.value = option;
+
+                            let checkboxOptionLabel = document.createElement('label');
+                            checkboxOptionLabel.setAttribute('for', `${field.id}_${option}`);
+                            checkboxOptionLabel.className = 'form-check-label';
+                            checkboxOptionLabel.textContent = option;
+
+                            checkboxWrapper.appendChild(checkboxInput);
+                            checkboxWrapper.appendChild(checkboxOptionLabel);
+                            formGroup.appendChild(checkboxWrapper);
+                        });
+                    }
+                    break;
+                case 'radio':
+                    let radioLabel = document.createElement('label');
+                    radioLabel.className = 'form-label';
+                    radioLabel.textContent = field.label;
+                    formGroup.appendChild(radioLabel);
+
+                    if (field.fetchOptionsFunction) {
+                        field.fetchOptionsFunction(formGroup, field.id);
+                    } else {
+                        field.options.forEach(option => {
+                            let radioWrapper = document.createElement('div');
+                            radioWrapper.className = 'form-check';
+
+                            let radioInput = document.createElement('input');
+                            radioInput.type = 'radio';
+                            radioInput.className = 'form-check-input';
+                            radioInput.name = field.id;
+                            radioInput.id = `${field.id}_${option}`;
+                            radioInput.value = option;
+
+                            let radioOptionLabel = document.createElement('label');
+                            radioOptionLabel.setAttribute('for', `${field.id}_${option}`);
+                            radioOptionLabel.className = 'form-check-label';
+                            radioOptionLabel.textContent = option;
+
+                            radioInput.addEventListener('change', validateForm);
+                            radioWrapper.appendChild(radioInput);
+                            radioWrapper.appendChild(radioOptionLabel);
+                            formGroup.appendChild(radioWrapper);
+                        });
+                    }
+                    break;
+                case 'ref':
+                    input = document.createElement('div');
+                    input.className = 'd-flex';
+
+                    let textInput = document.createElement('input');
+                    textInput.type = 'text';
+                    textInput.className = 'form-control';
+                    textInput.id = field.id;
+                    textInput.disabled = true;
+                    textInput.required = field.required;
+
+                    let idInput = document.createElement('input');
+                    idInput.type = 'text';
+                    idInput.className = 'form-control ml-2';
+                    idInput.id = `${field.id}Id`;
+                    idInput.disabled = true;
+                    idInput.required = field.required;
+
+                    let button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn btn-secondary ml-2';
+                    button.textContent = field.buttonLabel;
+
+                    button.addEventListener('click', () => {
+                        $('#itemModal').modal('show');
+                        field.fetchOptionsFunction(field.params);
+                    });
+
+                    input.appendChild(textInput);
+                    input.appendChild(idInput);
+                    input.appendChild(button);
+                    break;
+                case 'submit':
+                    input = document.createElement('button');
+                    input.type = 'submit';
+                    input.className = 'btn btn-primary';
+                    input.textContent = field.label;
+                    input.disabled = true;
+                    break;
+                default:
+                    console.warn(`Tipo de campo '${field.type}' não suportado.`);
+            }
+
+            if (field.type !== 'checkbox' && field.type !== 'radio') {
+                formGroup.appendChild(input);
+            }
+
+            return formGroup;
+        }
+
+        function validateForm() {
+            let isValid = true;
+            formConfig.fields.forEach(field => {
+                if (field.required) {
+                    let input = document.getElementById(field.id);
+                    if (input && !input.value) {
+                        isValid = false;
+                    }
+                    if (field.type === 'ref') {
+                        let idInput = document.getElementById(`${field.id}Id`);
+                        if (idInput && !idInput.value) {
+                            isValid = false;
+                        }
+                    }
+                }
+            });
+
+            const submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = !isValid;
+            }
+        }
+
+        function validateCPF(event) {
+            const cpf = event.target.value;
+            const regex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/;
+
+            if (!regex.test(cpf)) {
+                event.target.setCustomValidity('CPF inválido');
+            } else {
+                event.target.setCustomValidity('');
+            }
+
+            event.target.reportValidity();
+        }
+
+        function fetchCityOptions(selectElement) {
+            setTimeout(() => {
+                const cityOptions = ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Curitiba'];
+                cityOptions.forEach(city => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = city;
+                    optionElement.textContent = city;
+                    selectElement.appendChild(optionElement);
+                });
+                validateForm();
+            }, 1000);
+        }
+
+        function fetchCheckboxOptions(containerElement, fieldId) {
+            setTimeout(() => {
+                const checkboxOptions = ['Esportes', 'Música', 'Tecnologia', 'Arte'];
+                checkboxOptions.forEach(option => {
+                    let checkboxWrapper = document.createElement('div');
+                    checkboxWrapper.className = 'form-check';
+
+                    let checkboxInput = document.createElement('input');
+                    checkboxInput.type = 'checkbox';
+                    checkboxInput.className = 'form-check-input';
+                    checkboxInput.name = fieldId;
+                    checkboxInput.id = `${fieldId}_${option}`;
+                    checkboxInput.value = option;
+
+                    let checkboxOptionLabel = document.createElement('label');
+                    checkboxOptionLabel.setAttribute('for', `${fieldId}_${option}`);
+                    checkboxOptionLabel.className = 'form-check-label';
+                    checkboxOptionLabel.textContent = option;
+
+                    checkboxWrapper.appendChild(checkboxInput);
+                    checkboxWrapper.appendChild(checkboxOptionLabel);
+                    containerElement.appendChild(checkboxWrapper);
+                });
+                validateForm();
+            }, 1000);
+        }
+
+        function fetchRadioOptions(containerElement, fieldId) {
+            setTimeout(() => {
+                const radioOptions = ['Básico', 'Premium', 'VIP'];
+                radioOptions.forEach(option => {
+                    let radioWrapper = document.createElement('div');
+                    radioWrapper.className = 'form-check';
+
+                    let radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.className = 'form-check-input';
+                    radioInput.name = fieldId;
+                    radioInput.id = `${fieldId}_${option}`;
+                    radioInput.value = option;
+
+                    let radioOptionLabel = document.createElement('label');
+                    radioOptionLabel.setAttribute('for', `${fieldId}_${option}`);
+                    radioOptionLabel.className = 'form-check-label';
+                    radioOptionLabel.textContent = option;
+
+                    radioInput.addEventListener('change', validateForm);
+                    radioWrapper.appendChild(radioInput);
+                    radioWrapper.appendChild(radioOptionLabel);
+                    containerElement.appendChild(radioWrapper);
+                });
+                validateForm();
+            }, 1000);
+        }
+
+        function fetchItems(params) {
+            console.log(params);
+
+            const itemList = document.getElementById('modalItemList');
+            itemList.innerHTML = ''; // Clear the list before fetching new items
+
+            fetch('https://jsonplaceholder.typicode.com/posts/')
+                .then(response => response.json())
+                .then(data => {
+                    data.slice(0, 10).forEach(item => {
+                        let listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.textContent = item.title;
+                        listItem.addEventListener('click', () => {
+                            document.getElementById('item').value = item.title;
+                            document.getElementById('itemId').value = item.id;
+                            $('#itemModal').modal('hide');
+                            validateForm();
+                        });
+                        itemList.appendChild(listItem);
+                    });
+                });
+        }
+
+        function postFormData() {
+            const formElement = document.querySelector('form');
+            const formData = new FormData(formElement);
+            const formDataJson = {};
+
+            formData.forEach((value, key) => {
+                formDataJson[key] = value;
+                console.log(key, value);
+            });
+
+            console.log(formDataJson);
+
+            /*fetch('http://localhost:3000/forms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formDataJson),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao enviar formulário');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Formulário enviado com sucesso');
+                    console.log('Resposta do servidor:', data);
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar formulário:', error);
+                });*/
+        }
+
+        // Função para transformar formConfig em schemaConfig
+        function transformToSchemaConfig(formConfig) {
+            const schemaConfig = {
+                "schemaName": formConfig.schemaName,
+                "fields": []
+            };
+
+            formConfig.fields.forEach(field => {
+                switch (field.type) {
+                    case 'text':
+                    case 'email':
+                    case 'password':
+                    case 'textarea':
+                        schemaConfig.fields.push({ "name": field.id, "type": "String" });
+                        break;
+                    case 'select':
+                    case 'radio':
+                        schemaConfig.fields.push({ "name": field.id, "type": "String" });
+                        break;
+                    case 'checkbox':
+                        schemaConfig.fields.push({ "name": field.id, "type": "Array" });
+                        break;
+                    case 'date':
+                        schemaConfig.fields.push({ "name": field.id, "type": "Date" });
+                        break;
+                    case 'ref':
+                        schemaConfig.fields.push({ "name": field.id, "type": "Mixed" }); // You can adjust this as per your needs
+                        break;
+                    default:
+                        console.warn(`Tipo de campo '${field.type}' não suportado para schema.`);
+                }
+            });
+
+            // Exemplo de uso:
+
+            return schemaConfig;
+        }
+    </script>
 </body>
+
 </html>

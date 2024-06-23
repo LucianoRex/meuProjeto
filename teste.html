@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Formulário</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 id="formTitle" class="mb-4"></h2>
+        <form id="generatedForm" class="row"></form>
+    </div>
+
+    <script>
+        const formConfig = {
+            formTitle: "Formulário de Cadastro",
+            schemaName: "Cadastro",
+            caminho:"Caminho/Caminho",
+            nome:"nome",
+            tipo:"tipo",
+            fields: [
+                { type: 'text', label: 'Nome', id: 'nome', placeholder: 'Digite seu nome', class: 'col-6', required: true },
+                { type: 'email', label: 'Email', id: 'email', placeholder: 'Digite seu email', class: 'col-md-6', required: true },
+                { type: 'password', label: 'Senha', id: 'senha', placeholder: 'Digite sua senha', class: 'col-md-6', required: true },
+                { type: 'text', label: 'CPF', id: 'cpf', placeholder: 'Digite seu CPF', class: 'col-md-6', required: true },
+                { type: 'textarea', label: 'Mensagem', id: 'mensagem', placeholder: 'Digite sua mensagem', class: 'col-12', required: false },
+                { type: 'select', label: 'Gênero', id: 'genero', options: ['Masculino', 'Feminino', 'Outro'], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('generos') },
+                { type: 'select', label: 'Cidade', id: 'cidade', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('Cliente'),textContent:'nome',value:'_id' },
+                { type: 'checkbox', label: 'Interesses', id: 'interesses', options: [], class: 'col-md-6', required: false, fetchOptionsFunction: () => fetchOptions('interesses') },
+                { type: 'radio', label: 'Plano', id: 'plano', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('planos') },
+                { type: 'date', label: 'Data de Nascimento', id: 'dataNascimento', class: 'col-md-6', required: true },
+            ]
+        };
+
+        async function fetchOptions(apiEndpoint) {
+            const apiUrls = {
+                'generos': 'https://api.example.com/generos',
+                'cidades': 'https://api.example.com/cidades',
+                'interesses': 'https://api.example.com/interesses',
+                'planos': 'https://api.example.com/planos',
+                'Cliente': 'http://localhost:3000/documents/Cliente',
+            };
+
+            const apiUrl = apiUrls[apiEndpoint];
+            if (
+                !apiUrl) {
+                //alert()
+                return []}; // Retorna um array vazio se o endpoint não for reconhecido
+
+            try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição para ${apiUrl}: ${response.status} - ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data; // Retorna os dados obtidos da API
+    } catch (error) {
+        console.error(error.message);
+        return []; // Retorna um array vazio em caso de erro
+    }
+        }
+
+        function createForm(config) {
+            const formTitle = document.getElementById('formTitle');
+            formTitle.textContent = config.formTitle;
+
+            const form = document.getElementById('generatedForm');
+
+            config.fields.forEach(field => {
+                let formGroup = document.createElement('div');
+                formGroup.className = `form-group ${field.class}`;
+
+                let label = document.createElement('label');
+                label.setAttribute('for', field.id);
+                label.textContent = field.label;
+
+                let input;
+
+                switch (field.type) {
+                    case 'text':
+                    case 'email':
+                    case 'password':
+                    case 'date':
+                        input = document.createElement('input');
+                        input.type = field.type;
+                        input.className = 'form-control';
+                        input.id = field.id;
+                        input.placeholder = field.placeholder;
+                        input.required = field.required;
+                        break;
+                    case 'textarea':
+                        input = document.createElement('textarea');
+                        input.className = 'form-control';
+                        input.id = field.id;
+                        input.placeholder = field.placeholder;
+                        input.required = field.required;
+                        break;
+                    case 'select':
+                        input = document.createElement('select');
+                        input.className = 'form-control';
+                        input.id = field.id;
+                        input.required = field.required;
+                        if (field.options && field.options.length > 0) {
+                            field.options.forEach(option => {
+                                let opt = document.createElement('option');
+                                opt.value = option;
+                                opt.textContent = option;
+                                input.appendChild(opt);
+                            });
+                        } else if (field.fetchOptionsFunction) {
+                            field.fetchOptionsFunction().then(options => {
+                                options.forEach(option => {
+                                    let opt = document.createElement('option');
+                                    opt.value = option[field.value];
+                                    opt.textContent = option[field.textContent];
+                                    input.appendChild(opt);
+                                });
+                            }).catch(error => {
+                                console.error('Erro ao carregar opções:', error);
+                            });
+                        }
+                        break;
+                    case 'checkbox':
+                        input = document.createElement('div');
+                        input.className = 'form-check';
+                        if (field.options && field.options.length > 0) {
+                            field.options.forEach(option => {
+                                let checkboxDiv = document.createElement('div');
+                                checkboxDiv.className = 'form-check';
+
+                                let checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.className = 'form-check-input';
+                                checkbox.id = `${field.id}-${option}`;
+                                checkbox.name = field.id;
+                                checkbox.value = option;
+
+                                let checkboxLabel = document.createElement('label');
+                                checkboxLabel.className = 'form-check-label';
+                                checkboxLabel.setAttribute('for', `${field.id}-${option}`);
+                                checkboxLabel.textContent = option;
+
+                                checkboxDiv.appendChild(checkbox);
+                                checkboxDiv.appendChild(checkboxLabel);
+                                input.appendChild(checkboxDiv);
+                            });
+                        } else if (field.fetchOptionsFunction) {
+                            field.fetchOptionsFunction().then(options => {
+                                options.forEach(option => {
+                                    let checkboxDiv = document.createElement('div');
+                                    checkboxDiv.className = 'form-check';
+
+                                    let checkbox = document.createElement('input');
+                                    checkbox.type = 'checkbox';
+                                    checkbox.className = 'form-check-input';
+                                    checkbox.id = `${field.id}-${option}`;
+                                    checkbox.name = field.id;
+                                    checkbox.value = option;
+
+                                    let checkboxLabel = document.createElement('label');
+                                    checkboxLabel.className = 'form-check-label';
+                                    checkboxLabel.setAttribute('for', `${field.id}-${option}`);
+                                    checkboxLabel.textContent = option;
+
+                                    checkboxDiv.appendChild(checkbox);
+                                    checkboxDiv.appendChild(checkboxLabel);
+                                    input.appendChild(checkboxDiv);
+                                });
+                            }).catch(error => {
+                                console.error('Erro ao carregar opções:', error);
+                            });
+                        }
+                        break;
+                    case 'radio':
+                        input = document.createElement('div');
+                        input.className = 'form-check';
+                        if (field.options && field.options.length > 0) {
+                            field.options.forEach(option => {
+                                let radioDiv = document.createElement('div');
+                                radioDiv.className = 'form-check';
+
+                                let radio = document.createElement('input');
+                                radio.type = 'radio';
+                                radio.className = 'form-check-input';
+                                radio.id = `${field.id}-${option}`;
+                                radio.name = field.id;
+                                radio.value = option;
+
+                                let radioLabel = document.createElement('label');
+                                radioLabel.className = 'form-check-label';
+                                radioLabel.setAttribute('for', `${field.id}-${option}`);
+                                radioLabel.textContent = option;
+
+                                radioDiv.appendChild(radio);
+                                radioDiv.appendChild(radioLabel);
+                                input.appendChild(radioDiv);
+                            });
+                        } else if (field.fetchOptionsFunction) {
+                            field.fetchOptionsFunction().then(options => {
+                                options.forEach(option => {
+                                    let radioDiv = document.createElement('div');
+                                    radioDiv.className = 'form-check';
+
+                                    let radio = document.createElement('input');
+                                    radio.type = 'radio';
+                                    radio.className = 'form-check-input';
+                                    radio.id = `${field.id}-${option}`;
+                                    radio.name = field.id;
+                                    radio.value = option;
+
+                                    let radioLabel = document.createElement('label');
+                                    radioLabel.className = 'form-check-label';
+                                    radioLabel.setAttribute('for', `${field.id}-${option}`);
+                                    radioLabel.textContent = option;
+
+                                    radioDiv.appendChild(radio);
+                                    radioDiv.appendChild(radioLabel);
+                                    input.appendChild(radioDiv);
+                                });
+                            }).catch(error => {
+                                console.error('Erro ao carregar opções:', error);
+                            });
+                        }
+                        break;
+                }
+
+                formGroup.appendChild(label);
+                if (input) formGroup.appendChild(input);
+                form.appendChild(formGroup);
+            });
+
+            let submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.className = 'btn btn-success col-12 mt-3';
+            submitButton.textContent = 'Enviar';
+            form.appendChild(submitButton);
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                let formData = {};
+                config.fields.forEach(field => {
+                    if (field.type === 'checkbox') {
+                        formData[field.id] = [];
+                        let checkboxes = document.querySelectorAll(`#generatedForm input[name="${field.id}"]:checked`);
+                        checkboxes.forEach(checkbox => {
+                            formData[field.id].push(checkbox.value);
+                        });
+                    } else if (field.type === 'radio') {
+                        let selectedRadio = document.querySelector(`#generatedForm input[name="${field.id}"]:checked`);
+                        if (selectedRadio) {
+                            formData[field.id] = selectedRadio.value;
+                        }
+                    } else {
+                        formData[field.id] = document.getElementById(field.id).value;
+                    }
+                });
+                console.log(formData);
+                 // Fazendo o POST dos dados para o servidor
+             fetch('http://localhost:3000/create-document/Cliente', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro ao fazer POST para ${response.url}: ${response.status} - ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert('Formulário enviado com sucesso!');
+                // Aqui você pode adicionar lógica adicional após enviar o formulário com sucesso
+            })
+            .catch(error => {
+                console.error('Erro ao enviar formulário:', error);
+                alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
+            });
+        
+            });
+
+            
+
+        }
+
+        
+           
+        createForm(formConfig);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
