@@ -3,110 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tabela</title>
+  <title>Tabela Dinâmica</title>
   <!-- Adicione o link para o Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="container mt-4">
-    <h1>Tabela de Posts</h1>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Título</th>
-          <th>Corpo</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="post-table-body">
-        <!-- Aqui serão adicionadas as linhas da tabela -->
-      </tbody>
-    </table>
+    <h1>Tabela Dinâmica</h1>
+    <div id="dynamic-table-container"></div>
   </div>
 
   <!-- Adicione os scripts do Bootstrap e do seu script JavaScript -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-  <script src="seu-script.js"></script>
-</body>
-<script>
-    async function fetchPosts() {
-  try {
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
-    if (!response.ok) {
-      throw new Error('Network response was not ok.');
+  <script>
+    // Função para buscar dados de uma API
+    async function fetchData(apiUrl) {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        return [];
+      }
     }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return [];
-  }
-}
 
-function generateTable(posts) {
-  const tableBody = document.getElementById('post-table-body');
-  tableBody.innerHTML = '';
+    // Função para gerar a tabela dinâmica com Bootstrap
+    function generateTable(data, fields,field) {
+      console.log(data)
+      const container = document.getElementById('dynamic-table-container');
+      container.innerHTML = ''; // Limpa o conteúdo existente da div
 
-  posts.forEach(post => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${post.id}</td>
-      <td>${post.title}</td>
-      <td>${post.body}</td>
-      <td>
-        <button type="button" class="btn btn-primary btn-sm edit-btn" data-id="${post.id}">Editar</button>
-        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${post.id}">Excluir</button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
+      const table = document.createElement('table');
+      table.classList.add('table', 'table-striped');
 
-  attachEditAndDeleteListeners();
-}
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
 
-let postsData = [];
+      // Adiciona os cabeçalhos da tabela com base nos campos fornecidos
+      fields.forEach(field => {
+        const th = document.createElement('th');
+        th.textContent = field.label;
+        headerRow.appendChild(th);
+      });
 
-async function init() {
-  try {
-    postsData = await fetchPosts();
-    generateTable(postsData);
-  } catch (error) {
-    console.error('Error initializing:', error);
-  }
-}
+      // Adiciona um cabeçalho para as ações
+      const actionsTh = document.createElement('th');
+      actionsTh.textContent = 'Ações';
+      headerRow.appendChild(actionsTh);
 
-function attachEditAndDeleteListeners() {
-  const editButtons = document.querySelectorAll('.edit-btn');
-  editButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const postId = parseInt(btn.getAttribute('data-id'));
-      const post = postsData.find(p => p.id === postId);
-      if (post) {
-        // Simulate edit action (replace with actual edit logic)
-        alert(`Editing post with ID ${postId}: ${post.title}`);
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        fields.forEach(field => {
+          const td = document.createElement('td');
+          td.textContent = item[field.key];
+          row.appendChild(td);
+        });
+
+        // Adiciona os botões de editar e excluir
+        const actionsTd = document.createElement('td');
+        actionsTd.innerHTML = `
+          <button type="button" class="btn btn-primary btn-sm edit-btn" data-id="${item.id}">Editar</button>
+          <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${item.id}">Excluir</button>
+        `;
+        row.appendChild(actionsTd);
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+
+      attachEditAndDeleteListeners(data);
+    }
+
+    // Função para adicionar listeners aos botões de editar e excluir
+    function attachEditAndDeleteListeners(data) {
+      const editButtons = document.querySelectorAll('.edit-btn');
+      editButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = parseInt(btn.getAttribute('data-id'));
+          const item = data.find(i => i.id === itemId);
+          if (item) {
+            alert(`Editing item with ID ${itemId}`);
+            // Aqui você pode adicionar lógica para editar o item
+          }
+        });
+      });
+
+      const deleteButtons = document.querySelectorAll('.delete-btn');
+      deleteButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = parseInt(btn.getAttribute('data-id'));
+          const index = data.findIndex(i => i.id === itemId);
+          if (index !== -1) {
+            data.splice(index, 1);
+            generateTable(data, fields);
+            alert(`Deleted item with ID ${itemId}`);
+            // Aqui você pode adicionar lógica para excluir o item
+          }
+        });
+      });
+    }
+
+    // Função principal para inicializar a aplicação
+    async function init(apiUrl, fields) {
+      try {
+        const data = await fetchData(apiUrl);
+        generateTable(data, fields);
+      } catch (error) {
+        console.error('Error initializing:', error);
       }
+    }
+
+    // Parâmetros para inicialização
+    /*const apiUrl = 'https://jsonplaceholder.typicode.com/posts'; // URL da API
+    const fields = [
+      { label: 'ID', key: 'id' },
+      { label: 'Título', key: 'title' },
+      { label: 'Corpo', key: 'body' }
+    ];*/
+
+    const apiUrl = 'https://fakestoreapi.com/products'; // URL da API
+    const fields = [
+      { label: 'ID', key: 'id' },
+      { label: 'Título', key: 'title' },
+      { label: 'Price', key: 'price' }
+    ];
+
+    // Chamada para inicializar a aplicação quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', () => {
+      init(apiUrl, fields);
     });
-  });
-
-  const deleteButtons = document.querySelectorAll('.delete-btn');
-  deleteButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const postId = parseInt(btn.getAttribute('data-id'));
-      const index = postsData.findIndex(p => p.id === postId);
-      if (index !== -1) {
-        postsData.splice(index, 1);
-        generateTable(postsData);
-        // Simulate delete action (replace with actual delete logic)
-        alert(`Deleted post with ID ${postId}`);
-      }
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-});
-
-</script>
+  </script>
+</body>
 </html>

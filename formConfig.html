@@ -241,7 +241,7 @@
             console.log(transformToSchemaConfig(formData));
 
             try {
-                const response = await fetch('http://localhost:4000/create-schema', {
+                /*const response = await fetch('http://localhost:4000/create-schema', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -250,9 +250,8 @@
                 });
 
                 if (response.ok) {
-                    alert('Formulário salvo com sucesso!');
-                    alert('Formulário salvo com sucesso!');
-                    // Após o primeiro POST, faz o segundo POST
+                    alert('Formulário salvo com sucesso!');                
+                    // Após o primeiro POST, faz o segundo POST*/
                     const response2 = await fetch('http://localhost:3000/view', {
                         method: 'POST',
                         headers: {
@@ -266,9 +265,9 @@
                     } else {
                         alert('Erro ao enviar formulário para create-form.');
                     }
-                } else {
+                /*} else {
                     alert('Erro ao salvar o formulário.');
-                }
+                }*/
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro ao salvar o formulário.');

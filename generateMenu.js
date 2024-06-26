@@ -1,4 +1,4 @@
-function generateMenu(a) {
+function generateMenu(/*a*/) {
 
 
   const menuContainer = document.getElementById("menuItems");
@@ -10,7 +10,7 @@ function generateMenu(a) {
     loadingOverlay.style.display = "block"; // Mostra o overlay de loading
 
 
-    var url = "http://localhost:3000/lista-view";
+    var url = "http://localhost:3000/menu";
 
     fetch(url)
       .then(response => response.json())
@@ -112,7 +112,7 @@ function generateMenu(a) {
 
 }
 function makeRequest(_id) {
-  var url = `http://localhost:3000/carrega-view/${_id}`;
+  var url = `http://localhost:3000/carrega-menu/${_id}`;
 
   fetch(url)
     .then(response => response.json())
@@ -122,9 +122,10 @@ function makeRequest(_id) {
       if(data.tipo == 'tela'){
         loadPage(data.nome, data.html, data.css, data.js);
       }else if(data.tipo == 'lista'){
-        loadList(data.nome, data.html, data.css, data.js);
-      }else{
-        loadPage(data.nome, data.html, data.css, data.js);
+        console.log(data)
+        loadList(data);
+      }else if(data.tipo='form'){
+        loadForm(data.nome, data.html, data.css, data.js);
       }
       
 
