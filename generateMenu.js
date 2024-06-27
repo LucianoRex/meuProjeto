@@ -1,3 +1,5 @@
+
+
 function generateMenu(/*a*/) {
 
 
@@ -43,42 +45,42 @@ function generateMenu(/*a*/) {
 
   function transformMenuData(menuData) {
     const transformedData = {};
-
+  
     menuData.forEach(item => {
       const parts = item.caminho.split('/');
       let currentLevel = transformedData;
-
+  
       parts.forEach((part, index) => {
         if (!currentLevel[part]) {
           currentLevel[part] = {};
         }
         if (index === parts.length - 1) {
-          currentLevel[part]._nome = item.nome;
+          currentLevel[part]._title = part || 'Home';
           currentLevel[part]._id = item._id;
         }
         currentLevel = currentLevel[part];
       });
     });
-
+  
     return transformedData;
   }
-
+  
   function createMenu(menuData, parentElement) {
     const ul = document.createElement('ul');
     ul.className = 'list-group list-group-flush';
-
+  
     for (const key in menuData) {
       if (key.startsWith('_')) continue;
-
+  
       const li = document.createElement('li');
       li.className = 'list-group-item';
-
-      const nome = menuData[key]._nome || key;
-      li.textContent = nome;
-
+  
+      const title = menuData[key]._title || key;
+      li.textContent = title;
+  
       const hasSubmenus = Object.keys(menuData[key]).some(k => !k.startsWith('_'));
-
-      li.addEventListener('click', function (e) {
+  
+      li.addEventListener('click', function(e) {
         e.stopPropagation();
         if (hasSubmenus) {
           const submenu = li.querySelector('.submenu');
@@ -86,12 +88,11 @@ function generateMenu(/*a*/) {
             submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
           }
         } else {
-          //alert(`Clicked on ${nome}, ID: ${menuData[key]._id}`);
-
+          console.log(menuData[key]._id)
           makeRequest(menuData[key]._id)
         }
       });
-
+  
       if (hasSubmenus) {
         const submenu = document.createElement('div');
         submenu.className = 'submenu';
@@ -99,18 +100,16 @@ function generateMenu(/*a*/) {
         createMenu(menuData[key], submenu);
         li.appendChild(submenu);
       }
-
+  
       ul.appendChild(li);
     }
-
+  
     parentElement.appendChild(ul);
   }
 
-
-  busca();
-
-
+  busca()
 }
+  
 function makeRequest(_id) {
   var url = `http://localhost:3000/carrega-menu/${_id}`;
 
@@ -123,7 +122,8 @@ function makeRequest(_id) {
         loadPage(data.nome, data.html, data.css, data.js);
       }else if(data.tipo == 'lista'){
         console.log(data)
-        loadList(data);
+        //loadList(data);
+        loadList(data)
       }else if(data.tipo='form'){
         loadForm(data.nome, data.html, data.css, data.js);
       }

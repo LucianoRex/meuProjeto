@@ -1,3 +1,5 @@
+//import { createForm } from "./createForm";
+
 const menuItems = document.querySelector('#menuItems');
 const navTabs = document.querySelector('#navTabs');
 const tabContent = document.querySelector('#tabContent');
@@ -159,56 +161,56 @@ async function fetchDocumentsWithFilter(filterCriteria) {
 }
 
 // Função para criar e exibir modal de edição
-function createModal(fields) {
-  const modal = document.createElement('div');
-  modal.classList.add('modal', 'fade');
-  modal.id = 'editModal';
-  modal.tabIndex = -1;
-  modal.setAttribute('aria-labelledby', 'editModalLabel');
-  modal.setAttribute('aria-hidden', 'true');
+// function createModal(fields) {
+//   const modal = document.createElement('div');
+//   modal.classList.add('modal', 'fade');
+//   modal.id = 'editModal';
+//   modal.tabIndex = -1;
+//   modal.setAttribute('aria-labelledby', 'editModalLabel');
+//   modal.setAttribute('aria-hidden', 'true');
 
-  const modalContent = document.createElement('div');
-  modalContent.classList.add('modal-dialog');
-  modalContent.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="editForm"></form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="saveChanges">Salvar</button>
-      </div>
-    </div>
-  `;
+//   const modalContent = document.createElement('div');
+//   modalContent.classList.add('modal-dialog');
+//   modalContent.innerHTML = `
+//     <div class="modal-content">
+//       <div class="modal-header">
+//         <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
+//         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+//           <span aria-hidden="true">&times;</span>
+//         </button>
+//       </div>
+//       <div class="modal-body">
+//         <form id="editForm"></form>
+//       </div>
+//       <div class="modal-footer">
+//         <button type="button" class="btn btn-primary" id="saveChanges">Salvar</button>
+//       </div>
+//     </div>
+//   `;
 
-  document.body.appendChild(modal);
+//   document.body.appendChild(modal);
 
-  // Adicionar campos ao formulário no modal
-  const form = modalContent.querySelector('#editForm');
-  fields.forEach(field => {
-    const formGroup = document.createElement('div');
-    formGroup.classList.add('form-group');
-    formGroup.innerHTML = `
-      <label for="${field.campo}">${field.alias}</label>
-      <input type="text" class="form-control" id="${field.campo}" name="${field.campo}">
-    `;
-    form.appendChild(formGroup);
-  });
+//   // Adicionar campos ao formulário no modal
+//   const form = modalContent.querySelector('#editForm');
+//   fields.forEach(field => {
+//     const formGroup = document.createElement('div');
+//     formGroup.classList.add('form-group');
+//     formGroup.innerHTML = `
+//       <label for="${field.campo}">${field.alias}</label>
+//       <input type="text" class="form-control" id="${field.campo}" name="${field.campo}">
+//     `;
+//     form.appendChild(formGroup);
+//   });
 
-  // Evento de clique no botão de salvar alterações
-  modalContent.querySelector('#saveChanges').addEventListener('click', () => {
-    // Implementar lógica para salvar as alterações
-    alert('Alterações salvas!');
-    $('#editModal').modal('hide');
-  });
+//   // Evento de clique no botão de salvar alterações
+//   modalContent.querySelector('#saveChanges').addEventListener('click', () => {
+//     // Implementar lógica para salvar as alterações
+//     alert('Alterações salvas!');
+//     $('#editModal').modal('hide');
+//   });
 
-  modal.appendChild(modalContent);
-}
+//   modal.appendChild(modalContent);
+// }
 
 // Função para gerar tabela de documentos com filtro
 async function generateTable(schema, documents) {
@@ -217,7 +219,7 @@ async function generateTable(schema, documents) {
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
 
- 
+
 
   return table;
 }
@@ -314,24 +316,24 @@ async function loadList(data) {
     // Criar formulário de filtro
     const filterForm = document.createElement('form');
 
-// Adicionar classes ao formulário de filtro
-filterForm.classList.add('form-inline', 'my-2');
+    // Adicionar classes ao formulário de filtro
+    filterForm.classList.add('form-inline', 'my-2');
 
-// Seleção do campo
-const selectField = document.createElement('select');
-selectField.classList.add('form-control', 'mr-2', 'mb-2');
-selectField.innerHTML = `<option value="">Selecione um campo</option>`;
-campos.forEach(field => {
-  const option = document.createElement('option');
-  option.value = field.campo;
-  option.textContent = field.alias;
-  selectField.appendChild(option);
-});
+    // Seleção do campo
+    const selectField = document.createElement('select');
+    selectField.classList.add('form-control', 'mr-2', 'mb-2');
+    selectField.innerHTML = `<option value="">Selecione um campo</option>`;
+    campos.forEach(field => {
+      const option = document.createElement('option');
+      option.value = field.campo;
+      option.textContent = field.alias;
+      selectField.appendChild(option);
+    });
 
-// Operador de comparação
-const selectOperator = document.createElement('select');
-selectOperator.classList.add('form-control', 'mr-2', 'mb-2');
-selectOperator.innerHTML = `
+    // Operador de comparação
+    const selectOperator = document.createElement('select');
+    selectOperator.classList.add('form-control', 'mr-2', 'mb-2');
+    selectOperator.innerHTML = `
   <option value="">Selecione um operador</option>
   <option value="equals">=</option>
   <option value="contains">Contém</option>
@@ -339,54 +341,54 @@ selectOperator.innerHTML = `
   <option value="lt"><</option>
 `;
 
-// Campo de entrada
-const inputField = document.createElement('input');
-inputField.classList.add('form-control', 'mr-2', 'mb-2');
-inputField.type = 'text';
-inputField.placeholder = 'Valor para filtro';
+    // Campo de entrada
+    const inputField = document.createElement('input');
+    inputField.classList.add('form-control', 'mr-2', 'mb-2');
+    inputField.type = 'text';
+    inputField.placeholder = 'Valor para filtro';
 
-// Botão de OK
-const okButton = document.createElement('button');
-okButton.classList.add('btn', 'btn-primary', 'mb-2');
-okButton.textContent = 'OK';
+    // Botão de OK
+    const okButton = document.createElement('button');
+    okButton.classList.add('btn', 'btn-primary', 'mb-2');
+    okButton.textContent = 'OK';
 
-// Agrupar os elementos do formulário de filtro
-const filterGroup = document.createElement('div');
-filterGroup.classList.add('form-group', 'd-flex', 'align-items-center');
-filterGroup.appendChild(selectField);
-filterGroup.appendChild(selectOperator);
-filterGroup.appendChild(inputField);
-filterGroup.appendChild(okButton);
+    // Agrupar os elementos do formulário de filtro
+    const filterGroup = document.createElement('div');
+    filterGroup.classList.add('form-group', 'd-flex', 'align-items-center');
+    filterGroup.appendChild(selectField);
+    filterGroup.appendChild(selectOperator);
+    filterGroup.appendChild(inputField);
+    filterGroup.appendChild(okButton);
 
-// Adicionar o grupo ao formulário de filtro
-filterForm.appendChild(filterGroup);
+    // Adicionar o grupo ao formulário de filtro
+    filterForm.appendChild(filterGroup);
 
-// Adicionar evento para aplicar filtro
-okButton.addEventListener('click', async (e) => {
-  e.preventDefault()
-  const fieldName = selectField.value;
-  const operator = selectOperator.value;
-  const value = inputField.value.trim();
+    // Adicionar evento para aplicar filtro
+    okButton.addEventListener('click', async (e) => {
+      e.preventDefault()
+      const fieldName = selectField.value;
+      const operator = selectOperator.value;
+      const value = inputField.value.trim();
 
-  let filter = {};
-  if (fieldName && operator && value) {
-    switch (operator) {
-      case 'equals':
-        filter[fieldName] = value;
-        break;
-      case 'contains':
-        filter[fieldName] = { $regex: value, $options: 'i' };
-        break;
-      case 'gt':
-        filter[fieldName] = { $gt: parseFloat(value) };
-        break;
-      case 'lt':
-        filter[fieldName] = { $lt: parseFloat(value) };
-        break;
-      default:
-        break;
-    }
-  }
+      let filter = {};
+      if (fieldName && operator && value) {
+        switch (operator) {
+          case 'equals':
+            filter[fieldName] = value;
+            break;
+          case 'contains':
+            filter[fieldName] = { $regex: value, $options: 'i' };
+            break;
+          case 'gt':
+            filter[fieldName] = { $gt: parseFloat(value) };
+            break;
+          case 'lt':
+            filter[fieldName] = { $lt: parseFloat(value) };
+            break;
+          default:
+            break;
+        }
+      }
 
       try {
         // Buscar documentos com base no filtro
@@ -409,7 +411,7 @@ okButton.addEventListener('click', async (e) => {
           });
           const tdActions = document.createElement('td');
           tdActions.innerHTML = `
-            <button class="btn btn-primary btn-sm edit-document" data-id="${d._id}">Editammmmr</button>
+            <button class="btn btn-primary btn-sm edit-document" data-id="${d._id}">Editar</button>
             <button class="btn btn-danger btn-sm delete-document" data-id="${d._id}">Excluir</button>
           `;
           row.appendChild(tdActions);
@@ -467,6 +469,7 @@ async function fetchDocuments(field, operator, value) {
 
 // Evento de clique nos botões "Editar"
 document.addEventListener('click', async function (event) {
+  console.log(event.target)
   if (event.target.classList.contains('edit-document')) {
     const documentId = event.target.getAttribute('data-id');
     openEditModal(documentId);
@@ -475,6 +478,7 @@ document.addEventListener('click', async function (event) {
 
 // Função para abrir o modal de edição
 async function openEditModal(documentId) {
+  console.log()
   try {
     // Buscar documento pelo ID
     const d = await fetchDocumentById(documentId);
@@ -487,7 +491,7 @@ async function openEditModal(documentId) {
     // Verificar se o modal já existe, caso contrário criar
     let modal = document.getElementById('editModal');
     if (!modal) {
-      modal = createModal();
+      modal = createModal('Aluno');
       document.body.appendChild(modal);
     }
 
@@ -503,8 +507,8 @@ async function openEditModal(documentId) {
     form.innerHTML = '';
 
     // Adicionar campos ao formulário no modal
-    campos.forEach(field => {
-      console.log(document)
+    /*campos.forEach(field => {
+      console.log(d)
       const formGroup = document.createElement('div');
       formGroup.classList.add('form-group');
       formGroup.innerHTML = `
@@ -512,9 +516,30 @@ async function openEditModal(documentId) {
         <input type="text" class="form-control" id="${field.campo}" name="${field.campo}" value="${d[field.campo] || ''}">
       `;
       form.appendChild(formGroup);
-    });
+    })*/
 
     // Exibir o modal
+    createForm({
+      formTitle: "Aluno",
+      schemaName: "Cadastro",
+      caminho:"Caminho/Caminho",
+      nome:"nome",
+      tipo:"tipo",
+      fields: [
+          { type: 'text', label: 'Nome', id: 'nome', placeholder: 'Digite seu nome', class: 'col-6', required: true },
+          { type: 'text', label: 'Idade', id: 'idade', placeholder: 'Idade', class: 'col-md-6', required: true },
+          { type: 'password', label: 'Senha', id: 'senha', placeholder: 'Digite sua senha', class: 'col-md-6', required: true },
+          { type: 'text', label: 'CPF', id: 'cpf', placeholder: 'Digite seu CPF', class: 'col-md-6', required: true },
+          { type: 'textarea', label: 'Mensagem', id: 'mensagem', placeholder: 'Digite sua mensagem', class: 'col-12', required: false },
+          { type: 'select', label: 'Gênero', id: 'genero', options: ['Masculino', 'Feminino', 'Outro'], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('generos') },
+          { type: 'select', label: 'Cidade', id: 'cidade', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('aluno'),textContent:'nome',value:'_id' },
+          { type: 'checkbox', label: 'Interesses', id: 'interesses', options: [], class: 'col-md-6', required: false, fetchOptionsFunction: () => fetchOptions('interesses'),value:'name',textContent:'name' },
+          { type: 'radio', label: 'Plano', id: 'plano', options: [], class: 'col-md-6', required: true, fetchOptionsFunction: () => fetchOptions('planos') },
+          { type: 'date', label: 'Data de Nascimento', id: 'dataNascimento', class: 'col-md-6', required: true },
+      ]
+  },
+ d).then(e=> form.appendChild(e) )
+    
     $('#editModal').modal('show');
   } catch (error) {
     console.error('Error opening edit modal:', error);
@@ -536,7 +561,7 @@ async function fetchDocumentById(documentId) {
 }
 
 // Função para criar o modal de edição
-function createModal() {
+function createModal(titulo) {
   const modal = document.createElement('div');
   modal.classList.add('modal', 'fade');
   modal.id = 'editModal';
@@ -548,13 +573,13 @@ function createModal() {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
+          <h5 class="modal-title" id="editModalLabel">${titulo}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <form id="editForm"></form>
+          <form id="editForm" class="row"></form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" id="saveChanges">Salvar</button>
@@ -566,9 +591,19 @@ function createModal() {
   // Evento de clique no botão de salvar alterações
   modal.querySelector('#saveChanges').addEventListener('click', () => {
     // Implementar lógica para salvar as alterações
+    const form = modal.querySelector('#editForm');
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    console.log('Dados do formulário:', data);
+
     alert('Alterações salvas!');
     $('#editModal').modal('hide');
   });
 
   return modal;
 }
+
